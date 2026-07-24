@@ -1,0 +1,103 @@
+<resources>
+    <string name="app_name">MotoBook</string>
+    <string name="tagline">Your Ride. Your Data.</string>
+    
+    <!-- Welcome Screen -->
+    <string name="welcome_title">Welcome to MotoBook</string>
+    <string name="welcome_subtext">Your premium motorcycle companion. Track fuel, mileage, service, and history — completely offline.</string>
+    <string name="feature_mileage">Smart Mileage Tracking</string>
+    <string name="feature_service">Complete Service History</string>
+    <string name="feature_fuel">Fuel Cost Analytics</string>
+    <string name="btn_get_started">Get Started</string>
+    <string name="btn_restore_backup">Already have data? Restore Backup</string>
+    
+    <!-- Language Selection -->
+    <string name="select_language_title">Choose Your Language / ভাষা বেছে নিন</string>
+    <string name="lang_english">English</string>
+    <string name="lang_english_sub">Continue in English</string>
+    <string name="lang_bengali">বাংলা</string>
+    <string name="lang_bengali_sub">বাংলায় চালিয়ে যান</string>
+    <string name="btn_continue">Continue</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_fuel">Fuel</string>
+    <string name="nav_service">Service</string>
+    <string name="nav_history">History</string>
+    <string name="nav_settings">Settings</string>
+    
+    <!-- Dashboard -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="fuel_level">Fuel Level</string>
+    <string name="est_range">Est. Range</string>
+    <string name="last_fill">Last Fill</string>
+    <string name="current_mileage">Current Mileage</string>
+    <string name="avg_mileage">Average Mileage</string>
+    <string name="best_mileage">Best Mileage</string>
+    <string name="cost_per_km">Cost / km</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="add_fuel">Add Fuel</string>
+    <string name="tyre_pressure">Tyre Pressure</string>
+    <string name="bike_wash">Bike Wash</string>
+    <string name="chain_lube">Chain Lube</string>
+    <string name="recent_activity">Recent Activity</string>
+    <string name="no_bike_title">Add Your Motorcycle to Get Started</string>
+    <string name="btn_add_bike">Add Motorcycle</string>
+    
+    <!-- Bike Form -->
+    <string name="add_bike_title">Add Your Motorcycle</string>
+    <string name="edit_bike_title">Edit Motorcycle</string>
+    <string name="bike_nickname">Bike Nickname *</string>
+    <string name="brand">Brand *</string>
+    <string name="model">Model *</string>
+    <string name="year">Manufacturing Year</string>
+    <string name="registration_no">Registration Number</string>
+    <string name="fuel_type">Fuel Type</string>
+    <string name="tank_capacity">Tank Capacity (Liters) *</string>
+    <string name="reserve_capacity">Reserve Capacity (Liters)</string>
+    <string name="front_psi">Recommended Front PSI *</string>
+    <string name="rear_psi">Recommended Rear PSI *</string>
+    <string name="btn_save_bike">Save Motorcycle</string>
+    
+    <!-- Fuel Form -->
+    <string name="add_fuel_title">Add Fuel Entry</string>
+    <string name="edit_fuel_title">Edit Fuel Entry</string>
+    <string name="full_tank">FULL TANK</string>
+    <string name="partial_tank">PARTIAL</string>
+    <string name="date">Date</string>
+    <string name="odometer">Odometer Reading (km) *</string>
+    <string name="fuel_quantity">Fuel Quantity (Liters) *</string>
+    <string name="price_per_liter">Price Per Liter (৳) *</string>
+    <string name="total_cost">Total Cost (৳)</string>
+    <string name="station_name">Fuel Station Name</string>
+    <string name="notes">Notes</string>
+    <string name="btn_save_fuel">Save Fuel Entry</string>
+    
+    <!-- Service Form -->
+    <string name="add_service_title">Add Service Entry</string>
+    <string name="category">Category</string>
+    <string name="regular_service">Regular Service</string>
+    <string name="items_serviced">Items Serviced</string>
+    <string name="service_center">Service Center / Garage Name</string>
+    <string name="official_center">Official Service Center</string>
+    <string name="other_garage">Other Garage</string>
+    <string name="btn_save_service">Save Service Entry</string>
+    
+    <!-- Backup -->
+    <string name="backup_title">Backup &amp; Restore</string>
+    <string name="last_backup">Last Backup</string>
+    <string name="btn_create_backup">Create Backup Now</string>
+    <string name="btn_select_file">Select Backup File</string>
+    <string name="btn_restore">Restore Selected Backup</string>
+    <string name="auto_backup">Auto Backup</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="language">Language</string>
+    <string name="appearance">Appearance</string>
+    <string name="theme">Theme</string>
+    <string name="glass_intensity">Glass Intensity</string>
+    <string name="card_radius">Card Radius</string>
+    <string name="about">About MotoBook</string>
+    <string name="about_text">MotoBook v1.0.0 — Offline motorcycle companion built for riders.</string>
+</resources>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Motorcycle Top Silhouette & Fairing -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M68,54 L82,32 L94,28 L98,30 L88,36 L80,54 Z" />
+
+    <!-- Blue Aerodynamic Dynamic Swooshes -->
+    <path
+        android:fillColor="#0284C7"
+        android:pathData="M72,36 C105,22 148,32 168,50 C142,46 100,36 72,36 Z" />
+    <path
+        android:fillColor="#0284C7"
+        android:pathData="M92,146 C122,149 148,143 165,132 C150,138 122,143 92,146 Z" />
+
+    <!-- Left Front Motorcycle Wheel -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M46,96 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M46,96 m-12,0 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0" />
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M46,96 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -6,0" />
+    <path
+        android:strokeColor="#0F172A"
+        android:strokeWidth="1.5"
+        android:pathData="M46,84 L46,108 M34,96 L58,96 M38,88 L54,104 M38,104 L54,88" />
+
+    <!-- Right Rear Motorcycle Wheel -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M154,128 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M154,128 m-12,0 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0" />
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M154,128 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -6,0" />
+    <path
+        android:strokeColor="#0F172A"
+        android:strokeWidth="1.5"
+        android:pathData="M154,116 L154,140 M142,128 L166,128 M146,120 L162,136 M146,136 L162,120" />
+
+    <!-- "Moto" Typography -->
+    <!-- M -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M60,66 L68,66 L74,80 L80,66 L88,66 L88,96 L81,96 L81,76 L76,90 L72,90 L67,76 L67,96 L60,96 Z" />
+
+    <!-- Speedometer Gauge 'o' in Moto -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M100,81 m-13,0 a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0" />
+    <path
+        android:fillColor="#0284C7"
+        android:pathData="M100,81 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0" />
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M100,81 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M100,81 L105,76" />
+
+    <!-- t -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M118,62 L125,62 L125,70 L132,70 L132,76 L125,76 L125,90 C125,94 127,96 131,96 L134,96 L134,102 L129,102 C122,102 118,98 118,90 Z" />
+
+    <!-- o -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M146,81 m-13,0 a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M146,81 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0" />
+
+    <!-- "Book" Typography -->
+    <!-- B -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M50,102 L66,102 C72,102 76,105 76,109 C76,112 73,114 69,115 C75,116 78,119 78,124 C78,129 73,132 66,132 L50,132 Z M58,109 L64,109 C66,109 68,108 68,106 C68,104 66,103 64,103 L58,103 Z M58,125 L65,125 C67,125 69,124 69,122 C69,120 67,119 65,119 L58,119 Z" />
+
+    <!-- Gauge Twin 'o's in Book -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M96,120 m-13,0 a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M96,120 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M118,120 m-13,0 a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M118,120 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+
+    <!-- k -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M134,98 L141,98 L141,114 L152,102 L161,102 L150,115 L162,132 L153,132 L144,119 L141,123 L141,132 L134,132 Z" />
+</vector>

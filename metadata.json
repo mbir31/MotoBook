@@ -1,0 +1,6 @@
+{
+  "name": "MotoBook",
+  "description": "Offline motorcycle management companion app for tracking fuel, mileage, service, tyre pressure, bike wash, chain maintenance, and offline backup.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

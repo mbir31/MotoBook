@@ -1,0 +1,103 @@
+<resources>
+    <string name="app_name">মোটোবুক</string>
+    <string name="tagline">আপনার রাইড। আপনার ডেটা।</string>
+    
+    <!-- Welcome Screen -->
+    <string name="welcome_title">মোটোবুকে স্বাগতম</string>
+    <string name="welcome_subtext">আপনার প্রিমিয়াম মোটরবাইক ডিজিটাল সঙ্গী। জ্বালানি, মাইলেজ, সার্ভিস ও হিস্ট্রি ট্র্যাকিং — সম্পূর্ণ অফলাইনে।</string>
+    <string name="feature_mileage">স্মার্ট মাইলেজ ট্র্যাকিং</string>
+    <string name="feature_service">সম্পূর্ণ সার্ভিস হিস্ট্রি</string>
+    <string name="feature_fuel">ফ্যুয়েল খরচ অ্যানালিটিক্স</string>
+    <string name="btn_get_started">শুরু করুন</string>
+    <string name="btn_restore_backup">পূর্বে সংরক্ষিত ডেটা আছে? ব্যাকআপ পুনরুদ্ধার করুন</string>
+    
+    <!-- Language Selection -->
+    <string name="select_language_title">Choose Your Language / ভাষা বেছে নিন</string>
+    <string name="lang_english">English</string>
+    <string name="lang_english_sub">Continue in English</string>
+    <string name="lang_bengali">বাংলা</string>
+    <string name="lang_bengali_sub">বাংলায় চালিয়ে যান</string>
+    <string name="btn_continue">চালিয়ে যান</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">হোম</string>
+    <string name="nav_fuel">জ্বালানি</string>
+    <string name="nav_service">সার্ভিস</string>
+    <string name="nav_history">হিস্ট্রি</string>
+    <string name="nav_settings">সেটিংস</string>
+    
+    <!-- Dashboard -->
+    <string name="dashboard_title">ড্যাশবোর্ড</string>
+    <string name="fuel_level">জ্বালানির পরিমাণ</string>
+    <string name="est_range">আনুমানিক রেঞ্জ</string>
+    <string name="last_fill">সর্বশেষ রিফুয়েল</string>
+    <string name="current_mileage">বর্তমান মাইলেজ</string>
+    <string name="avg_mileage">গড় মাইলেজ</string>
+    <string name="best_mileage">সেরা মাইলেজ</string>
+    <string name="cost_per_km">প্রতি কিমিতে খরচ</string>
+    <string name="quick_actions">দ্রুত কাজ</string>
+    <string name="add_fuel">জ্বালানি যোগ</string>
+    <string name="tyre_pressure">টায়ার প্রেশার</string>
+    <string name="bike_wash">বাইক ওয়াশ</string>
+    <string name="chain_lube">চেইন লুব</string>
+    <string name="recent_activity">সাম্প্রতিক অ্যাক্টিভিটি</string>
+    <string name="no_bike_title">শুরু করতে আপনার মোটরসাইকেল যোগ করুন</string>
+    <string name="btn_add_bike">বাইক যোগ করুন</string>
+    
+    <!-- Bike Form -->
+    <string name="add_bike_title">মোটরসাইকেল যোগ করুন</string>
+    <string name="edit_bike_title">মোটরসাইকেল এডিট করুন</string>
+    <string name="bike_nickname">বাইকের নাম *</string>
+    <string name="brand">ব্র্যান্ড *</string>
+    <string name="model">মডেল *</string>
+    <string name="year">উৎপাদন সাল</string>
+    <string name="registration_no">রেজিস্ট্রেশন নম্বর</string>
+    <string name="fuel_type">ফুয়েল টাইপ</string>
+    <string name="tank_capacity">ট্যাংক ক্যাপাসিটি (লিটার) *</string>
+    <string name="reserve_capacity">রিজার্ভ ক্যাপাসিটি (লিটার)</string>
+    <string name="front_psi">সামনের টায়ার প্রেশার (PSI) *</string>
+    <string name="rear_psi">পেছনের টায়ার প্রেশার (PSI) *</string>
+    <string name="btn_save_bike">বাইক সেভ করুন</string>
+    
+    <!-- Fuel Form -->
+    <string name="add_fuel_title">জ্বালানি হিসেব যোগ করুন</string>
+    <string name="edit_fuel_title">জ্বালানি হিসেব এডিট করুন</string>
+    <string name="full_tank">ফুল ট্যাংক</string>
+    <string name="partial_tank">পার্শিয়াল (আংশিক)</string>
+    <string name="date">তারিখ</string>
+    <string name="odometer">ওডোমিটার রিডিং (কিমির হিসেব) *</string>
+    <string name="fuel_quantity">জ্বালানির পরিমাণ (লিটার) *</string>
+    <string name="price_per_liter">প্রতি লিটার দাম (৳) *</string>
+    <string name="total_cost">মোট খরচ (৳)</string>
+    <string name="station_name">ফুয়েল পাম্পের নাম</string>
+    <string name="notes">নোট</string>
+    <string name="btn_save_fuel">জ্বালানি সেভ করুন</string>
+    
+    <!-- Service Form -->
+    <string name="add_service_title">সার্ভিস এন্ট্রি যোগ করুন</string>
+    <string name="category">ক্যাটাগরি</string>
+    <string name="regular_service">রেগুলার সার্ভিস</string>
+    <string name="items_serviced">সার্ভিস করা পার্টস</string>
+    <string name="service_center">সার্ভিস সেন্টার / গ্যারেজের নাম</string>
+    <string name="official_center">অফিসিয়াল সার্ভিস সেন্টার</string>
+    <string name="other_garage">অন্যান্য গ্যারেজ</string>
+    <string name="btn_save_service">সার্ভিস সেভ করুন</string>
+    
+    <!-- Backup -->
+    <string name="backup_title">ব্যাকআপ ও রিস্টোর</string>
+    <string name="last_backup">সর্বশেষ ব্যাকআপ</string>
+    <string name="btn_create_backup">এখনই ব্যাকআপ নিন</string>
+    <string name="btn_select_file">ব্যাকআপ ফাইল সিলেক্ট করুন</string>
+    <string name="btn_restore">ব্যাকআপ রিস্টোর করুন</string>
+    <string name="auto_backup">অটো ব্যাকআপ</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">সেটিংস</string>
+    <string name="language">ভাষা</string>
+    <string name="appearance">অ্যাপিয়ারেন্স</string>
+    <string name="theme">থিম</string>
+    <string name="glass_intensity">গ্লাস ইনটেনসিটি</string>
+    <string name="card_radius">কার্ড রেডিয়াস</string>
+    <string name="about">মোটোবুক সম্পর্কে</string>
+    <string name="about_text">মোটোবুক v1.0.0 — রাইডারদের জন্য তৈরি অফলাইন মোটরসাইকেল প্ল্যাটফর্ম।</string>
+</resources>
