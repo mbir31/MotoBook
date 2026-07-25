@@ -9,27 +9,40 @@ import com.squareup.moshi.Types
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class BikeRepositoryImpl(private val bikeDao: BikeDao) : BikeRepository {
+class BikeRepositoryImpl(
+    private val bikeDao: BikeDao,
+    private val onDataChanged: (suspend () -> Unit)? = null
+) : BikeRepository {
     override fun getAllBikes(): Flow<List<Bike>> =
         bikeDao.getAllBikes().map { entities -> entities.map { it.toDomain() } }
 
     override suspend fun getBikeById(id: Long): Bike? =
         bikeDao.getBikeById(id)?.toDomain()
 
-    override suspend fun insertBike(bike: Bike): Long =
-        bikeDao.insertBike(bike.toEntity())
+    override suspend fun insertBike(bike: Bike): Long {
+        val result = bikeDao.insertBike(bike.toEntity())
+        onDataChanged?.invoke()
+        return result
+    }
 
-    override suspend fun updateBike(bike: Bike) =
+    override suspend fun updateBike(bike: Bike) {
         bikeDao.updateBike(bike.toEntity())
+        onDataChanged?.invoke()
+    }
 
-    override suspend fun deleteBike(bike: Bike) =
+    override suspend fun deleteBike(bike: Bike) {
         bikeDao.deleteBike(bike.toEntity())
+        onDataChanged?.invoke()
+    }
 
     override suspend fun getBikeCount(): Int =
         bikeDao.getBikeCount()
 }
 
-class FuelRepositoryImpl(private val fuelDao: FuelDao) : FuelRepository {
+class FuelRepositoryImpl(
+    private val fuelDao: FuelDao,
+    private val onDataChanged: (suspend () -> Unit)? = null
+) : FuelRepository {
     override fun getFuelEntriesByBike(bikeId: Long): Flow<List<FuelEntry>> =
         fuelDao.getFuelEntriesByBike(bikeId).map { list -> list.map { it.toDomain() } }
 
@@ -42,14 +55,21 @@ class FuelRepositoryImpl(private val fuelDao: FuelDao) : FuelRepository {
     override suspend fun getFuelEntryById(id: Long): FuelEntry? =
         fuelDao.getFuelEntryById(id)?.toDomain()
 
-    override suspend fun insertFuelEntry(entry: FuelEntry): Long =
-        fuelDao.insertFuelEntry(entry.toEntity())
+    override suspend fun insertFuelEntry(entry: FuelEntry): Long {
+        val id = fuelDao.insertFuelEntry(entry.toEntity())
+        onDataChanged?.invoke()
+        return id
+    }
 
-    override suspend fun updateFuelEntry(entry: FuelEntry) =
+    override suspend fun updateFuelEntry(entry: FuelEntry) {
         fuelDao.updateFuelEntry(entry.toEntity())
+        onDataChanged?.invoke()
+    }
 
-    override suspend fun deleteFuelEntry(entry: FuelEntry) =
+    override suspend fun deleteFuelEntry(entry: FuelEntry) {
         fuelDao.deleteFuelEntry(entry.toEntity())
+        onDataChanged?.invoke()
+    }
 
     override suspend fun getTotalFuelCost(bikeId: Long): Float? =
         fuelDao.getTotalFuelCost(bikeId)
@@ -61,7 +81,10 @@ class FuelRepositoryImpl(private val fuelDao: FuelDao) : FuelRepository {
         fuelDao.getLastFuelEntry(bikeId)?.toDomain()
 }
 
-class ServiceRepositoryImpl(private val serviceDao: ServiceDao) : ServiceRepository {
+class ServiceRepositoryImpl(
+    private val serviceDao: ServiceDao,
+    private val onDataChanged: (suspend () -> Unit)? = null
+) : ServiceRepository {
     override fun getServiceEntriesByBike(bikeId: Long): Flow<List<ServiceEntry>> =
         serviceDao.getServiceEntriesByBike(bikeId).map { list -> list.map { it.toDomain() } }
 
@@ -71,20 +94,30 @@ class ServiceRepositoryImpl(private val serviceDao: ServiceDao) : ServiceReposit
     override suspend fun getLastServiceEntry(bikeId: Long): ServiceEntry? =
         serviceDao.getLastServiceEntry(bikeId)?.toDomain()
 
-    override suspend fun insertServiceEntry(entry: ServiceEntry): Long =
-        serviceDao.insertServiceEntry(entry.toEntity())
+    override suspend fun insertServiceEntry(entry: ServiceEntry): Long {
+        val id = serviceDao.insertServiceEntry(entry.toEntity())
+        onDataChanged?.invoke()
+        return id
+    }
 
-    override suspend fun updateServiceEntry(entry: ServiceEntry) =
+    override suspend fun updateServiceEntry(entry: ServiceEntry) {
         serviceDao.updateServiceEntry(entry.toEntity())
+        onDataChanged?.invoke()
+    }
 
-    override suspend fun deleteServiceEntry(entry: ServiceEntry) =
+    override suspend fun deleteServiceEntry(entry: ServiceEntry) {
         serviceDao.deleteServiceEntry(entry.toEntity())
+        onDataChanged?.invoke()
+    }
 
     override suspend fun getTotalServiceCost(bikeId: Long): Float? =
         serviceDao.getTotalServiceCost(bikeId)
 }
 
-class TyrePressureRepositoryImpl(private val tyreDao: TyrePressureDao) : TyrePressureRepository {
+class TyrePressureRepositoryImpl(
+    private val tyreDao: TyrePressureDao,
+    private val onDataChanged: (suspend () -> Unit)? = null
+) : TyrePressureRepository {
     override fun getTyrePressureEntriesByBike(bikeId: Long): Flow<List<TyrePressureEntry>> =
         tyreDao.getTyrePressureEntriesByBike(bikeId).map { list -> list.map { it.toDomain() } }
 
@@ -94,17 +127,27 @@ class TyrePressureRepositoryImpl(private val tyreDao: TyrePressureDao) : TyrePre
     override suspend fun getLastTyrePressureEntry(bikeId: Long): TyrePressureEntry? =
         tyreDao.getLastTyrePressureEntry(bikeId)?.toDomain()
 
-    override suspend fun insertTyrePressureEntry(entry: TyrePressureEntry): Long =
-        tyreDao.insertTyrePressureEntry(entry.toEntity())
+    override suspend fun insertTyrePressureEntry(entry: TyrePressureEntry): Long {
+        val id = tyreDao.insertTyrePressureEntry(entry.toEntity())
+        onDataChanged?.invoke()
+        return id
+    }
 
-    override suspend fun updateTyrePressureEntry(entry: TyrePressureEntry) =
+    override suspend fun updateTyrePressureEntry(entry: TyrePressureEntry) {
         tyreDao.updateTyrePressureEntry(entry.toEntity())
+        onDataChanged?.invoke()
+    }
 
-    override suspend fun deleteTyrePressureEntry(entry: TyrePressureEntry) =
+    override suspend fun deleteTyrePressureEntry(entry: TyrePressureEntry) {
         tyreDao.deleteTyrePressureEntry(entry.toEntity())
+        onDataChanged?.invoke()
+    }
 }
 
-class WashRepositoryImpl(private val washDao: WashDao) : WashRepository {
+class WashRepositoryImpl(
+    private val washDao: WashDao,
+    private val onDataChanged: (suspend () -> Unit)? = null
+) : WashRepository {
     override fun getWashEntriesByBike(bikeId: Long): Flow<List<WashEntry>> =
         washDao.getWashEntriesByBike(bikeId).map { list -> list.map { it.toDomain() } }
 
@@ -114,17 +157,27 @@ class WashRepositoryImpl(private val washDao: WashDao) : WashRepository {
     override suspend fun getLastWashEntry(bikeId: Long): WashEntry? =
         washDao.getLastWashEntry(bikeId)?.toDomain()
 
-    override suspend fun insertWashEntry(entry: WashEntry): Long =
-        washDao.insertWashEntry(entry.toEntity())
+    override suspend fun insertWashEntry(entry: WashEntry): Long {
+        val id = washDao.insertWashEntry(entry.toEntity())
+        onDataChanged?.invoke()
+        return id
+    }
 
-    override suspend fun updateWashEntry(entry: WashEntry) =
+    override suspend fun updateWashEntry(entry: WashEntry) {
         washDao.updateWashEntry(entry.toEntity())
+        onDataChanged?.invoke()
+    }
 
-    override suspend fun deleteWashEntry(entry: WashEntry) =
+    override suspend fun deleteWashEntry(entry: WashEntry) {
         washDao.deleteWashEntry(entry.toEntity())
+        onDataChanged?.invoke()
+    }
 }
 
-class ChainRepositoryImpl(private val chainDao: ChainDao) : ChainRepository {
+class ChainRepositoryImpl(
+    private val chainDao: ChainDao,
+    private val onDataChanged: (suspend () -> Unit)? = null
+) : ChainRepository {
     override fun getChainEntriesByBike(bikeId: Long): Flow<List<ChainEntry>> =
         chainDao.getChainEntriesByBike(bikeId).map { list -> list.map { it.toDomain() } }
 
@@ -134,37 +187,60 @@ class ChainRepositoryImpl(private val chainDao: ChainDao) : ChainRepository {
     override suspend fun getLastChainEntry(bikeId: Long): ChainEntry? =
         chainDao.getLastChainEntry(bikeId)?.toDomain()
 
-    override suspend fun insertChainEntry(entry: ChainEntry): Long =
-        chainDao.insertChainEntry(entry.toEntity())
+    override suspend fun insertChainEntry(entry: ChainEntry): Long {
+        val id = chainDao.insertChainEntry(entry.toEntity())
+        onDataChanged?.invoke()
+        return id
+    }
 
-    override suspend fun updateChainEntry(entry: ChainEntry) =
+    override suspend fun updateChainEntry(entry: ChainEntry) {
         chainDao.updateChainEntry(entry.toEntity())
+        onDataChanged?.invoke()
+    }
 
-    override suspend fun deleteChainEntry(entry: ChainEntry) =
+    override suspend fun deleteChainEntry(entry: ChainEntry) {
         chainDao.deleteChainEntry(entry.toEntity())
+        onDataChanged?.invoke()
+    }
 }
 
+class ReminderRepositoryImpl(
+    private val reminderDao: ReminderDao,
+    private val onDataChanged: (suspend () -> Unit)? = null
+) : ReminderRepository {
+    override fun getRemindersByBike(bikeId: Long): Flow<List<MaintenanceReminder>> =
+        reminderDao.getRemindersByBike(bikeId).map { list -> list.map { it.toDomain() } }
+
+    override suspend fun getRemindersByBikeSync(bikeId: Long): List<MaintenanceReminder> =
+        reminderDao.getRemindersByBikeSync(bikeId).map { it.toDomain() }
+
+    override suspend fun insertReminder(reminder: MaintenanceReminder): Long {
+        val id = reminderDao.insertReminder(reminder.toEntity())
+        onDataChanged?.invoke()
+        return id
+    }
+
+    override suspend fun updateReminder(reminder: MaintenanceReminder) {
+        reminderDao.updateReminder(reminder.toEntity())
+        onDataChanged?.invoke()
+    }
+
+    override suspend fun deleteReminder(reminder: MaintenanceReminder) {
+        reminderDao.deleteReminder(reminder.toEntity())
+        onDataChanged?.invoke()
+    }
+}
+
+
 class BackupRepositoryImpl(
-    private val bikeDao: BikeDao,
-    private val fuelDao: FuelDao,
-    private val serviceDao: ServiceDao,
-    private val tyreDao: TyrePressureDao,
-    private val washDao: WashDao,
-    private val chainDao: ChainDao
+    private val database: com.example.motobook.data.local.database.MotoBookDatabase
 ) : BackupRepository {
 
-    private val moshi = Moshi.Builder().build()
-
     override suspend fun createBackupJson(): String {
-        // Collect all data synchronously
-        val bikes = bikeDao.getAllBikes()
-        // We will do a full export map
-        val backupMap = mutableMapOf<String, Any>()
-        // Simple JSON backup string generator using Moshi
-        return ""
+        return com.example.motobook.data.backup.AutoBackupManager.generateBackupJson(database)
     }
 
     override suspend fun restoreBackupJson(jsonString: String): Boolean {
-        return true
+        return com.example.motobook.data.backup.AutoBackupManager.restoreFromBackupJson(database, jsonString)
     }
 }

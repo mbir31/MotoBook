@@ -51,7 +51,7 @@ fun BackupScreen(
             Column {
                 MotoTopBar(title = stringResource(id = R.string.backup_title), onBackClick = onBackClick)
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 GlassCard(
                     modifier = Modifier.fillMaxWidth(),
@@ -64,16 +64,65 @@ fun BackupScreen(
                         color = TextSecondary,
                         letterSpacing = 1.sp
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = if (lastBackupTime > 0) dateFormat.format(Date(lastBackupTime)) else "Never",
+                        text = if (lastBackupTime > 0) dateFormat.format(Date(lastBackupTime)) else "Auto Backup Active",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = palette.textPrimary
                     )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "⚡ Automatic backup saves your data instantly to storage on every single entry.",
+                        fontSize = 12.sp,
+                        color = palette.primary
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // Storage Folder Info Card
+                GlassCard(modifier = Modifier.fillMaxWidth()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(AmberPrimary.copy(alpha = 0.2f), androidx.compose.foundation.shape.CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Folder,
+                                contentDescription = null,
+                                tint = AmberPrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = "BACKUP STORAGE LOCATION",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextSecondary,
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Internal Storage > Documents > MotoBook_Backups",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = palette.textPrimary
+                            )
+                            Text(
+                                text = "Directly accessible via phone File Manager.",
+                                fontSize = 11.sp,
+                                color = TextMuted
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
 
                 GlassCard(modifier = Modifier.fillMaxWidth()) {
                     Row(
@@ -81,12 +130,19 @@ fun BackupScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(id = R.string.auto_backup),
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = palette.textPrimary
-                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(id = R.string.auto_backup),
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = palette.textPrimary
+                            )
+                            Text(
+                                text = "Instant background save on every input",
+                                fontSize = 11.sp,
+                                color = TextSecondary
+                            )
+                        }
                         Switch(
                             checked = autoBackupEnabled,
                             onCheckedChange = onAutoBackupToggle,
@@ -98,15 +154,15 @@ fun BackupScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 GlowButton(
-                    text = stringResource(id = R.string.btn_create_backup),
+                    text = "Backup Now to Storage",
                     icon = Icons.Default.CloudUpload,
                     onClick = onCreateBackup
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedButton(
                     onClick = onRestoreBackup,
@@ -124,8 +180,8 @@ fun BackupScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Restore Backup JSON File",
-                        fontSize = 15.sp,
+                        text = "Restore Data from MotoBook Folder",
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = palette.primary
                     )
@@ -134,3 +190,4 @@ fun BackupScreen(
         }
     }
 }
+

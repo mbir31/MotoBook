@@ -100,3 +100,26 @@ data class MileageStats(
     val costPerKm: Float? = null,
     val currentCyclePartialFuel: Float = 0.0f
 )
+
+data class MaintenanceReminder(
+    val reminderId: Long = 0,
+    val bikeId: Long,
+    val title: String,
+    val dueOdometer: Float? = null,
+    val dueDate: Long? = null,
+    val intervalKm: Float? = null,
+    val lastDoneOdometer: Float? = null,
+    val lastDoneDate: Long? = null,
+    val isCompleted: Boolean = false,
+    val notes: String? = null,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+data class MonthlyExpenditureSummary(
+    val yearMonthKey: String, // e.g. "2026-07"
+    val displayMonthName: String, // e.g. "July 2026"
+    val totalFuelCost: Float,
+    val totalServiceCost: Float,
+    val totalWashCost: Float,
+    val totalOverallCost: Float
+)

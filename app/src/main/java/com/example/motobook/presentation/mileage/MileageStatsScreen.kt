@@ -43,7 +43,7 @@ fun MileageStatsScreen(
                 .padding(horizontal = 20.dp)
         ) {
             MotoTopBar(
-                title = "Mileage Analytics",
+                title = stringResource(id = R.string.mileage_stats_title),
                 onBackClick = onBackClick
             )
 

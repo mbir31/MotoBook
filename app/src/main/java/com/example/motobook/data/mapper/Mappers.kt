@@ -166,3 +166,31 @@ fun ChainEntry.toEntity(): ChainEntity = ChainEntity(
     notes = notes,
     createdAt = createdAt
 )
+
+fun ReminderEntity.toDomain(): MaintenanceReminder = MaintenanceReminder(
+    reminderId = reminderId,
+    bikeId = bikeId,
+    title = title,
+    dueOdometer = dueOdometer,
+    dueDate = dueDate,
+    intervalKm = intervalKm,
+    lastDoneOdometer = lastDoneOdometer,
+    lastDoneDate = lastDoneDate,
+    isCompleted = isCompleted,
+    notes = notes,
+    createdAt = createdAt
+)
+
+fun MaintenanceReminder.toEntity(): ReminderEntity = ReminderEntity(
+    reminderId = reminderId,
+    bikeId = bikeId,
+    title = title,
+    dueOdometer = dueOdometer,
+    dueDate = dueDate,
+    intervalKm = intervalKm,
+    lastDoneOdometer = lastDoneOdometer,
+    lastDoneDate = lastDoneDate,
+    isCompleted = isCompleted,
+    notes = notes,
+    createdAt = createdAt
+)

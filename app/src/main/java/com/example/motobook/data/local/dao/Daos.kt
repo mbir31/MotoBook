@@ -9,6 +9,9 @@ interface BikeDao {
     @Query("SELECT * FROM bikes ORDER BY createdAt DESC")
     fun getAllBikes(): Flow<List<BikeEntity>>
 
+    @Query("SELECT * FROM bikes ORDER BY createdAt DESC")
+    suspend fun getAllBikesSync(): List<BikeEntity>
+
     @Query("SELECT * FROM bikes WHERE bikeId = :id")
     suspend fun getBikeById(id: Long): BikeEntity?
 
@@ -32,6 +35,9 @@ interface FuelDao {
 
     @Query("SELECT * FROM fuel_entries WHERE bikeId = :bikeId ORDER BY date DESC")
     suspend fun getFuelEntriesByBikeSync(bikeId: Long): List<FuelEntity>
+
+    @Query("SELECT * FROM fuel_entries ORDER BY date DESC")
+    suspend fun getAllFuelEntriesSync(): List<FuelEntity>
 
     @Query("SELECT * FROM fuel_entries WHERE fuelId = :id")
     suspend fun getFuelEntryById(id: Long): FuelEntity?
@@ -69,6 +75,9 @@ interface ServiceDao {
     @Query("SELECT * FROM service_entries WHERE bikeId = :bikeId ORDER BY date DESC")
     suspend fun getServiceEntriesByBikeSync(bikeId: Long): List<ServiceEntity>
 
+    @Query("SELECT * FROM service_entries ORDER BY date DESC")
+    suspend fun getAllServicesSync(): List<ServiceEntity>
+
     @Query("SELECT * FROM service_entries WHERE bikeId = :bikeId ORDER BY date DESC LIMIT 1")
     suspend fun getLastServiceEntry(bikeId: Long): ServiceEntity?
 
@@ -93,6 +102,9 @@ interface TyrePressureDao {
     @Query("SELECT * FROM tyre_pressure_entries WHERE bikeId = :bikeId ORDER BY date DESC")
     suspend fun getTyrePressureEntriesSync(bikeId: Long): List<TyrePressureEntity>
 
+    @Query("SELECT * FROM tyre_pressure_entries ORDER BY date DESC")
+    suspend fun getAllTyresSync(): List<TyrePressureEntity>
+
     @Query("SELECT * FROM tyre_pressure_entries WHERE bikeId = :bikeId ORDER BY date DESC LIMIT 1")
     suspend fun getLastTyrePressureEntry(bikeId: Long): TyrePressureEntity?
 
@@ -113,6 +125,9 @@ interface WashDao {
 
     @Query("SELECT * FROM wash_entries WHERE bikeId = :bikeId ORDER BY date DESC")
     suspend fun getWashEntriesSync(bikeId: Long): List<WashEntity>
+
+    @Query("SELECT * FROM wash_entries ORDER BY date DESC")
+    suspend fun getAllWashesSync(): List<WashEntity>
 
     @Query("SELECT * FROM wash_entries WHERE bikeId = :bikeId ORDER BY date DESC LIMIT 1")
     suspend fun getLastWashEntry(bikeId: Long): WashEntity?
@@ -135,6 +150,9 @@ interface ChainDao {
     @Query("SELECT * FROM chain_entries WHERE bikeId = :bikeId ORDER BY date DESC")
     suspend fun getChainEntriesSync(bikeId: Long): List<ChainEntity>
 
+    @Query("SELECT * FROM chain_entries ORDER BY date DESC")
+    suspend fun getAllChainsSync(): List<ChainEntity>
+
     @Query("SELECT * FROM chain_entries WHERE bikeId = :bikeId ORDER BY date DESC LIMIT 1")
     suspend fun getLastChainEntry(bikeId: Long): ChainEntity?
 
@@ -146,4 +164,26 @@ interface ChainDao {
 
     @Delete
     suspend fun deleteChainEntry(entry: ChainEntity)
+}
+
+
+@Dao
+interface ReminderDao {
+    @Query("SELECT * FROM reminders WHERE bikeId = :bikeId ORDER BY isCompleted ASC, dueOdometer ASC, dueDate ASC")
+    fun getRemindersByBike(bikeId: Long): Flow<List<ReminderEntity>>
+
+    @Query("SELECT * FROM reminders WHERE bikeId = :bikeId ORDER BY isCompleted ASC, dueOdometer ASC, dueDate ASC")
+    suspend fun getRemindersByBikeSync(bikeId: Long): List<ReminderEntity>
+
+    @Query("SELECT * FROM reminders")
+    suspend fun getAllRemindersSync(): List<ReminderEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertReminder(reminder: ReminderEntity): Long
+
+    @Update
+    suspend fun updateReminder(reminder: ReminderEntity)
+
+    @Delete
+    suspend fun deleteReminder(reminder: ReminderEntity)
 }

@@ -1,21 +1,27 @@
 package com.example.motobook.presentation.tyre
 
+import android.app.DatePickerDialog
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.motobook.domain.model.TyrePressureEntry
 import com.example.motobook.presentation.bike.MotoTextField
 import com.example.motobook.presentation.components.GlassCard
@@ -30,15 +36,60 @@ fun TyrePressureScreen(
     recommendedFrontPsi: Float = 28f,
     recommendedRearPsi: Float = 32f,
     entries: List<TyrePressureEntry>,
-    onSaveLog: (front: String, rear: String, notes: String?) -> Unit,
+    onSaveLog: (dateMillis: Long, notes: String?) -> Unit,
     onBackClick: (() -> Unit)? = null
 ) {
-    var frontPsi by remember { mutableStateOf("") }
-    var rearPsi by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    var selectedDateMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var notes by remember { mutableStateOf("") }
 
     val palette = LocalThemePalette.current
     val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+
+    val formattedSelectedDate = remember(selectedDateMillis) {
+        val dateStr = dateFormat.format(Date(selectedDateMillis))
+        val todayStr = dateFormat.format(Date())
+        if (dateStr == todayStr) {
+            "Today ($dateStr)"
+        } else {
+            dateStr
+        }
+    }
+
+    val calendar = Calendar.getInstance().apply { timeInMillis = selectedDateMillis }
+    val datePickerDialog = remember(selectedDateMillis, context) {
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                val cal = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, year)
+                    set(Calendar.MONTH, month)
+                    set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                }
+                selectedDateMillis = cal.timeInMillis
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
+
+    // Sort entries by date descending
+    val sortedEntries = remember(entries) {
+        entries.sortedByDescending { it.date }
+    }
+
+    // Find the latest refill before the current/present day (or latest entry overall)
+    val todayStart = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.timeInMillis
+
+    val previousRefill = remember(sortedEntries, todayStart) {
+        sortedEntries.firstOrNull { it.date < todayStart } ?: sortedEntries.firstOrNull()
+    }
 
     Box(
         modifier = Modifier
@@ -52,7 +103,7 @@ fun TyrePressureScreen(
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp)
         ) {
-            MotoTopBar(title = "Tyre Pressure Logs", onBackClick = onBackClick)
+            MotoTopBar(title = stringResource(id = R.string.tyre_screen_title), onBackClick = onBackClick)
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -62,7 +113,7 @@ fun TyrePressureScreen(
                 backgroundColor = palette.primary.copy(alpha = 0.12f)
             ) {
                 Text(
-                    text = "RECOMMENDED PRESSURE",
+                    text = stringResource(id = R.string.recommended_pressure).uppercase(),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextSecondary,
@@ -74,7 +125,11 @@ fun TyrePressureScreen(
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "FRONT", fontSize = 12.sp, color = TextSecondary)
+                        Text(
+                            text = stringResource(id = R.string.front_tyre).uppercase(),
+                            fontSize = 12.sp,
+                            color = TextSecondary
+                        )
                         Text(
                             text = "${recommendedFrontPsi.toInt()} PSI",
                             fontSize = 20.sp,
@@ -83,7 +138,11 @@ fun TyrePressureScreen(
                         )
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "REAR", fontSize = 12.sp, color = TextSecondary)
+                        Text(
+                            text = stringResource(id = R.string.rear_tyre).uppercase(),
+                            fontSize = 12.sp,
+                            color = TextSecondary
+                        )
                         Text(
                             text = "${recommendedRearPsi.toInt()} PSI",
                             fontSize = 20.sp,
@@ -94,12 +153,60 @@ fun TyrePressureScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Add Log Input
+            // Previous Refill Status Banner
+            if (previousRefill != null) {
+                val daysAgo = remember(previousRefill.date) {
+                    val diff = System.currentTimeMillis() - previousRefill.date
+                    val days = (diff / (1000 * 60 * 60 * 24)).toInt()
+                    when {
+                        days <= 0 -> "Today"
+                        days == 1 -> "Yesterday"
+                        else -> "$days days ago"
+                    }
+                }
+
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    backgroundColor = palette.primary.copy(alpha = 0.08f)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.History,
+                            contentDescription = null,
+                            tint = palette.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = stringResource(id = R.string.last_refilled_before).uppercase(),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextSecondary
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "$daysAgo (${dateFormat.format(Date(previousRefill.date))})",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = palette.textPrimary
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+            }
+
+            // Air Refill Date Input Card
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "LOG NEW PRESSURE",
+                    text = stringResource(id = R.string.air_refill_date).uppercase(),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = palette.primary,
@@ -107,36 +214,62 @@ fun TyrePressureScreen(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        MotoTextField(
-                            value = frontPsi,
-                            onValueChange = { frontPsi = it },
-                            label = "Front PSI *",
-                            keyboardType = KeyboardType.Number
-                        )
-                    }
-                    Box(modifier = Modifier.weight(1f)) {
-                        MotoTextField(
-                            value = rearPsi,
-                            onValueChange = { rearPsi = it },
-                            label = "Rear PSI *",
-                            keyboardType = KeyboardType.Number
-                        )
+                // Date Selector Container
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { datePickerDialog.show() },
+                    color = palette.surface.copy(alpha = 0.6f),
+                    shape = MotoBookShapes.medium,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, palette.primary.copy(alpha = 0.3f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = stringResource(id = R.string.select_air_refill_date),
+                                fontSize = 11.sp,
+                                color = TextSecondary
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = formattedSelectedDate,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = palette.textPrimary
+                            )
+                        }
+                        IconButton(onClick = { datePickerDialog.show() }) {
+                            Icon(
+                                imageVector = Icons.Default.CalendarToday,
+                                contentDescription = "Pick Refill Date",
+                                tint = palette.primary
+                            )
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                MotoTextField(
+                    value = notes,
+                    onValueChange = { notes = it },
+                    label = stringResource(id = R.string.notes)
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
                 GlowButton(
-                    text = "Save Pressure Log",
+                    text = stringResource(id = R.string.log_air_refill),
                     onClick = {
-                        if (frontPsi.isNotBlank() && rearPsi.isNotBlank()) {
-                            onSaveLog(frontPsi, rearPsi, notes.ifBlank { null })
-                            frontPsi = ""
-                            rearPsi = ""
-                            notes = ""
-                        }
+                        onSaveLog(selectedDateMillis, notes.ifBlank { null })
+                        selectedDateMillis = System.currentTimeMillis()
+                        notes = ""
                     }
                 )
             }
@@ -144,7 +277,7 @@ fun TyrePressureScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "PRESSURE HISTORY",
+                text = stringResource(id = R.string.previous_refill_dates).uppercase(),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextSecondary,
@@ -153,50 +286,90 @@ fun TyrePressureScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
-            ) {
-                items(entries, key = { it.tyrePressureId }) { log ->
-                    GlassCard(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = dateFormat.format(Date(log.date)),
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = palette.textPrimary
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "Front: ${log.frontPsi.toInt()} PSI  |  Rear: ${log.rearPsi.toInt()} PSI",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = palette.primary
-                                )
+            if (sortedEntries.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.no_previous_refill),
+                        fontSize = 14.sp,
+                        color = TextMuted
+                    )
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(bottom = 24.dp)
+                ) {
+                    items(sortedEntries, key = { it.tyrePressureId }) { log ->
+                        val entryDateFormatted = dateFormat.format(Date(log.date))
+                        val entryDaysAgo = remember(log.date) {
+                            val diff = System.currentTimeMillis() - log.date
+                            val days = (diff / (1000 * 60 * 60 * 24)).toInt()
+                            when {
+                                days <= 0 -> "Today"
+                                days == 1 -> "Yesterday"
+                                else -> "$days days ago"
                             }
+                        }
 
-                            // Status Indicator
-                            val isOk = kotlin.math.abs(log.frontPsi - recommendedFrontPsi) <= 2f &&
-                                    kotlin.math.abs(log.rearPsi - recommendedRearPsi) <= 2f
-                            val statusText = if (isOk) "✅ OK" else "⚠️ Check"
-                            val statusColor = if (isOk) EmeraldPrimary else AmberPrimary
-
-                            Surface(
-                                color = statusColor.copy(alpha = 0.2f),
-                                shape = MotoBookShapes.small
+                        GlassCard(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = statusText,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = statusColor,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Air,
+                                        contentDescription = null,
+                                        tint = palette.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Column {
+                                        Text(
+                                            text = entryDateFormatted,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = palette.textPrimary
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        val subText = if (!log.notes.isNull_or_empty()) "$entryDaysAgo • ${log.notes}" else entryDaysAgo
+                                        Text(
+                                            text = subText,
+                                            fontSize = 12.sp,
+                                            color = TextSecondary
+                                        )
+                                    }
+                                }
+
+                                Surface(
+                                    color = EmeraldPrimary.copy(alpha = 0.2f),
+                                    shape = MotoBookShapes.small
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = null,
+                                            tint = EmeraldPrimary,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "Refilled",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = EmeraldPrimary
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -205,3 +378,6 @@ fun TyrePressureScreen(
         }
     }
 }
+
+private fun String?.isNull_or_empty(): Boolean = this.isNull_or_blank()
+private fun String?.isNull_or_blank(): Boolean = this == null || this.trim().isEmpty()

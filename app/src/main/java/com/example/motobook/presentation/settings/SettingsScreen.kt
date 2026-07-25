@@ -1,28 +1,48 @@
 package com.example.motobook.presentation.settings
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.R
+import com.example.motobook.domain.model.Bike
 import com.example.motobook.presentation.components.GlassCard
 import com.example.motobook.presentation.components.MotoTopBar
 import com.example.motobook.presentation.components.SegmentedToggle
 import com.example.motobook.presentation.theme.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 
 @Composable
 fun SettingsScreen(
@@ -34,10 +54,38 @@ fun SettingsScreen(
     onGlassIntensityChange: (Float) -> Unit,
     cardRadius: Float,
     onCardRadiusChange: (Float) -> Unit,
+    currentBike: Bike? = null,
+    onUpdateBikePhoto: (String?) -> Unit = {},
     onNavigateToBackup: () -> Unit,
     onBackClick: (() -> Unit)? = null
 ) {
     val palette = LocalThemePalette.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            scope.launch(Dispatchers.IO) {
+                try {
+                    val inputStream = context.contentResolver.openInputStream(uri)
+                    val file = File(context.filesDir, "bike_photo_${currentBike?.bikeId ?: 0}.jpg")
+                    val outputStream = FileOutputStream(file)
+                    inputStream?.use { input ->
+                        outputStream.use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                    withContext(Dispatchers.Main) {
+                        onUpdateBikePhoto(file.absolutePath)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
 
     val themes = listOf(
         "FROST_LIGHT",
@@ -60,6 +108,135 @@ fun SettingsScreen(
             MotoTopBar(title = stringResource(id = R.string.settings_title), onBackClick = onBackClick)
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Motorcycle Profile Photo Card
+            if (currentBike != null) {
+                GlassCard(modifier = Modifier.fillMaxWidth()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.TwoWheeler,
+                            contentDescription = null,
+                            tint = palette.primary
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "MOTORCYCLE PROFILE PHOTO",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = palette.primary,
+                            letterSpacing = 1.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(68.dp)
+                                .clip(CircleShape)
+                                .background(palette.primary.copy(alpha = 0.15f), CircleShape)
+                                .border(2.dp, palette.primary, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (!currentBike.bikeImagePath.isNullOrBlank()) {
+                                AsyncImage(
+                                    model = currentBike.bikeImagePath,
+                                    contentDescription = "Bike Photo",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(CircleShape)
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.TwoWheeler,
+                                    contentDescription = null,
+                                    tint = palette.primary,
+                                    modifier = Modifier.size(36.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Column {
+                            Text(
+                                text = currentBike.bikeName,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = palette.textPrimary
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "${currentBike.brand} ${currentBike.model}",
+                                fontSize = 13.sp,
+                                color = TextSecondary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Surface(
+                                    color = palette.primary.copy(alpha = 0.18f),
+                                    shape = MotoBookShapes.small,
+                                    modifier = Modifier.clickable { photoPickerLauncher.launch("image/*") }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.AddPhotoAlternate,
+                                            contentDescription = null,
+                                            tint = palette.primary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = if (currentBike.bikeImagePath.isNullOrBlank()) "Upload Photo" else "Change Photo",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = palette.primary
+                                        )
+                                    }
+                                }
+
+                                if (!currentBike.bikeImagePath.isNullOrBlank()) {
+                                    Surface(
+                                        color = Color.Red.copy(alpha = 0.12f),
+                                        shape = MotoBookShapes.small,
+                                        modifier = Modifier.clickable { onUpdateBikePhoto(null) }
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = null,
+                                                tint = Color.Red,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                text = "Remove",
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.Red
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             // Language Card
             GlassCard(modifier = Modifier.fillMaxWidth()) {
@@ -113,7 +290,7 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Text(
-                    text = "Theme Variant",
+                    text = stringResource(id = R.string.theme_variant),
                     fontSize = 13.sp,
                     color = TextSecondary
                 )
@@ -147,7 +324,7 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "Glass Intensity: ${(glassIntensity * 100).toInt()}%",
+                    text = "${stringResource(id = R.string.glass_intensity)}: ${(glassIntensity * 100).toInt()}%",
                     fontSize = 13.sp,
                     color = TextSecondary
                 )
@@ -161,7 +338,7 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Card Corner Radius: ${cardRadius.toInt()}dp",
+                    text = "${stringResource(id = R.string.card_radius)}: ${cardRadius.toInt()}dp",
                     fontSize = 13.sp,
                     color = TextSecondary
                 )
@@ -201,7 +378,7 @@ fun SettingsScreen(
                         )
                     }
                     Text(
-                        text = "Manage →",
+                        text = stringResource(id = R.string.manage_label),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = palette.primary

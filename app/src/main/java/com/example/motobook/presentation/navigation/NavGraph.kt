@@ -28,6 +28,7 @@ import com.example.motobook.presentation.fuel.FuelViewModel
 import com.example.motobook.presentation.history.HistoryScreen
 import com.example.motobook.presentation.history.HistoryViewModel
 import com.example.motobook.presentation.language.LanguageSelectionScreen
+import com.example.motobook.presentation.maintenance.MaintenanceScreen
 import com.example.motobook.presentation.mileage.MileageStatsScreen
 import com.example.motobook.presentation.mileage.MileageViewModel
 import com.example.motobook.presentation.service.AddServiceScreen
@@ -117,31 +118,46 @@ fun NavGraph(
                 factory = DashboardViewModel.Factory(
                     container.bikeRepository,
                     container.fuelRepository,
-                    container.serviceRepository
+                    container.serviceRepository,
+                    container.washRepository,
+                    container.reminderRepository
                 )
             )
 
             val bike by dashboardViewModel.selectedBike.collectAsState()
             val mileageStats by dashboardViewModel.mileageStats.collectAsState()
             val lastFuelEntry by dashboardViewModel.lastFuelEntry.collectAsState()
+            val fuelEntries by dashboardViewModel.fuelEntries.collectAsState()
+            val recentServices by dashboardViewModel.recentServices.collectAsState()
+            val washEntries by dashboardViewModel.washEntries.collectAsState()
+            val reminders by dashboardViewModel.reminders.collectAsState()
+            val currentOdometer by dashboardViewModel.currentOdometer.collectAsState()
 
             DashboardScreen(
                 bike = bike,
                 mileageStats = mileageStats,
                 lastFuelEntry = lastFuelEntry,
+                fuelEntries = fuelEntries,
+                serviceEntries = recentServices,
+                washEntries = washEntries,
+                reminders = reminders,
+                currentOdometer = currentOdometer,
+                onAddReminder = { dashboardViewModel.addReminder(it) },
+                onCompleteReminder = { dashboardViewModel.completeReminder(it) },
+                onDeleteReminder = { dashboardViewModel.deleteReminder(it) },
                 onAddBikeClick = { navController.navigate(Screen.AddBike.route) },
-                onNavigateToAddFuel = { navController.navigate(Screen.AddFuel.route) },
-                onNavigateToFuelHistory = { navController.navigate(Screen.FuelHistory.route) },
                 onNavigateToMileageStats = { navController.navigate(Screen.MileageStats.route) },
-                onNavigateToAddService = { navController.navigate(Screen.AddService.route) },
-                onNavigateToServiceHistory = { navController.navigate(Screen.ServiceHistory.route) },
-                onNavigateToTyrePressure = { navController.navigate(Screen.TyrePressure.route) },
-                onNavigateToWash = { navController.navigate(Screen.Wash.route) },
-                onNavigateToChain = { navController.navigate(Screen.Chain.route) },
-                onNavigateToHistory = { navController.navigate(Screen.History.route) },
-                onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
+                onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                onTabSelected = { route ->
+                    navController.navigate(route) {
+                        popUpTo(Screen.Dashboard.route) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
             )
         }
+
 
         composable(Screen.AddBike.route) {
             val bikeViewModel: BikeViewModel = viewModel(
@@ -191,7 +207,31 @@ fun NavGraph(
                 onAddFuelClick = { navController.navigate(Screen.AddFuel.route) },
                 onEditEntryClick = { entry -> /* Edit entry */ },
                 onDeleteEntryClick = { entry -> fuelViewModel.deleteEntry(entry) },
-                onBackClick = { navController.popBackStack() }
+                onNavigateToMileageStats = { navController.navigate(Screen.MileageStats.route) },
+                onTabSelected = { route ->
+                    navController.navigate(route) {
+                        popUpTo(Screen.Dashboard.route) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+
+        composable(Screen.Maintenance.route) {
+            MaintenanceScreen(
+                onNavigateToTyrePressure = { navController.navigate(Screen.TyrePressure.route) },
+                onNavigateToWash = { navController.navigate(Screen.Wash.route) },
+                onNavigateToServiceHistory = { navController.navigate(Screen.ServiceHistory.route) },
+                onNavigateToAddService = { navController.navigate(Screen.AddService.route) },
+                onNavigateToChain = { navController.navigate(Screen.Chain.route) },
+                onTabSelected = { route ->
+                    navController.navigate(route) {
+                        popUpTo(Screen.Dashboard.route) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
             )
         }
 
@@ -257,7 +297,13 @@ fun NavGraph(
                 selectedCategory = selectedCategory,
                 onCategorySelect = { historyViewModel.setCategory(it) },
                 onDeleteItem = { historyViewModel.deleteItem(it) },
-                onBackClick = { navController.popBackStack() }
+                onTabSelected = { route ->
+                    navController.navigate(route) {
+                        popUpTo(Screen.Dashboard.route) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
             )
         }
 
@@ -269,14 +315,14 @@ fun NavGraph(
                 recommendedFrontPsi = currentBike?.frontTyrePressure ?: 28f,
                 recommendedRearPsi = currentBike?.rearTyrePressure ?: 32f,
                 entries = tyreEntries,
-                onSaveLog = { front, rear, notes ->
+                onSaveLog = { dateMillis, notes ->
                     scope.launch {
                         container.tyrePressureRepository.insertTyrePressureEntry(
                             TyrePressureEntry(
                                 bikeId = activeBikeId,
-                                date = System.currentTimeMillis(),
-                                frontPsi = front.toFloatOrNull() ?: 28f,
-                                rearPsi = rear.toFloatOrNull() ?: 32f,
+                                date = dateMillis,
+                                frontPsi = currentBike?.frontTyrePressure ?: 28f,
+                                rearPsi = currentBike?.rearTyrePressure ?: 32f,
                                 notes = notes
                             )
                         )
@@ -292,15 +338,14 @@ fun NavGraph(
 
             WashScreen(
                 entries = washEntries,
-                onSaveWash = { type, cost, notes ->
+                onSaveWash = { type, cost, dateMillis ->
                     scope.launch {
                         container.washRepository.insertWashEntry(
                             WashEntry(
                                 bikeId = activeBikeId,
-                                date = System.currentTimeMillis(),
+                                date = dateMillis,
                                 washType = type,
-                                cost = cost.toFloatOrNull(),
-                                notes = notes
+                                cost = cost.toFloatOrNull()
                             )
                         )
                     }
@@ -315,12 +360,12 @@ fun NavGraph(
 
             ChainScreen(
                 entries = chainEntries,
-                onSaveChain = { odo, lube, notes ->
+                onSaveChain = { odo, lube, notes, dateMillis ->
                     scope.launch {
                         container.chainRepository.insertChainEntry(
                             ChainEntry(
                                 bikeId = activeBikeId,
-                                date = System.currentTimeMillis(),
+                                date = dateMillis,
                                 odometer = odo.toFloatOrNull(),
                                 lubricantType = lube,
                                 notes = notes
@@ -370,6 +415,19 @@ fun NavGraph(
                 onGlassIntensityChange = { valInt -> settingsViewModel.setGlassIntensity(valInt) },
                 cardRadius = cardRadius,
                 onCardRadiusChange = { radius -> settingsViewModel.setCardRadius(radius) },
+                currentBike = currentBike,
+                onUpdateBikePhoto = { photoPath ->
+                    if (currentBike != null) {
+                        scope.launch {
+                            container.bikeRepository.updateBike(
+                                currentBike.copy(
+                                    bikeImagePath = photoPath,
+                                    updatedAt = System.currentTimeMillis()
+                                )
+                            )
+                        }
+                    }
+                },
                 onNavigateToBackup = { navController.navigate(Screen.Backup.route) },
                 onBackClick = { navController.popBackStack() }
             )

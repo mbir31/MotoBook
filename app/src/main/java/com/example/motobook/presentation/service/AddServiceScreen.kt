@@ -1,16 +1,20 @@
 package com.example.motobook.presentation.service
 
+import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -24,6 +28,8 @@ import com.example.motobook.presentation.components.GlowButton
 import com.example.motobook.presentation.components.MotoTopBar
 import com.example.motobook.presentation.components.SegmentedToggle
 import com.example.motobook.presentation.theme.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -44,6 +50,13 @@ fun AddServiceScreen(
 ) {
     var categoryIndex by remember { mutableIntStateOf(0) }
     val categories = listOf("REGULAR_SERVICE", "TYRE", "REPAIR", "WASH", "CHAIN")
+    val categoryDisplayNames = listOf(
+        stringResource(id = R.string.regular_service),
+        stringResource(id = R.string.nav_fuel),
+        stringResource(id = R.string.tyre_pressure),
+        stringResource(id = R.string.bike_wash),
+        stringResource(id = R.string.chain_lube)
+    )
 
     var selectedDateMillis by remember { mutableLongStateOf(existingEntry?.date ?: System.currentTimeMillis()) }
     var odometer by remember { mutableStateOf(existingEntry?.odometer?.toInt()?.toString() ?: "") }
@@ -58,13 +71,55 @@ fun AddServiceScreen(
         "Chain & Sprocket", "Battery", "Front Tyre", "Rear Tyre", "Clutch Plate"
     )
 
+    val presetItemLabels = mapOf(
+        "Engine Oil" to stringResource(id = R.string.item_engine_oil),
+        "Oil Filter" to stringResource(id = R.string.item_oil_filter),
+        "Air Filter" to stringResource(id = R.string.item_air_filter),
+        "Spark Plug" to stringResource(id = R.string.item_spark_plug),
+        "Front Brake Pad" to stringResource(id = R.string.item_front_brake_pad),
+        "Rear Brake Pad" to stringResource(id = R.string.item_rear_brake_pad),
+        "Brake Fluid" to stringResource(id = R.string.item_brake_fluid),
+        "Coolant" to stringResource(id = R.string.item_coolant),
+        "Chain & Sprocket" to stringResource(id = R.string.item_chain_sprocket),
+        "Battery" to stringResource(id = R.string.item_battery),
+        "Front Tyre" to stringResource(id = R.string.item_front_tyre),
+        "Rear Tyre" to stringResource(id = R.string.item_rear_tyre),
+        "Clutch Plate" to stringResource(id = R.string.item_clutch_plate)
+    )
+
     val selectedItems = remember {
         mutableStateListOf<String>().apply {
             if (existingEntry != null) addAll(existingEntry.itemsServiced)
         }
     }
 
+    val context = LocalContext.current
     val palette = LocalThemePalette.current
+
+    val dateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
+    val formattedDate = remember(selectedDateMillis) {
+        val dateStr = dateFormat.format(Date(selectedDateMillis))
+        val todayStr = dateFormat.format(Date())
+        if (dateStr == todayStr) "Today ($dateStr)" else dateStr
+    }
+
+    val calendar = Calendar.getInstance().apply { timeInMillis = selectedDateMillis }
+    val datePickerDialog = remember(selectedDateMillis, context) {
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                val cal = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, year)
+                    set(Calendar.MONTH, month)
+                    set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                }
+                selectedDateMillis = cal.timeInMillis
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -89,7 +144,7 @@ fun AddServiceScreen(
             // Category Card
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "SERVICE CATEGORY",
+                    text = stringResource(id = R.string.service_category_header),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = palette.primary,
@@ -97,7 +152,7 @@ fun AddServiceScreen(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 SegmentedToggle(
-                    options = categories,
+                    options = categoryDisplayNames,
                     selectedIndex = categoryIndex,
                     onOptionSelected = { categoryIndex = it }
                 )
@@ -108,13 +163,54 @@ fun AddServiceScreen(
             // Details Card
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "DETAILS",
+                    text = stringResource(id = R.string.details_header),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = palette.primary,
                     letterSpacing = 1.sp
                 )
                 Spacer(modifier = Modifier.height(14.dp))
+
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { datePickerDialog.show() },
+                    color = palette.surface.copy(alpha = 0.6f),
+                    shape = MotoBookShapes.medium,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, palette.primary.copy(alpha = 0.3f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = stringResource(id = R.string.date),
+                                fontSize = 11.sp,
+                                color = TextSecondary
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = formattedDate,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = palette.textPrimary
+                            )
+                        }
+                        IconButton(onClick = { datePickerDialog.show() }) {
+                            Icon(
+                                imageVector = Icons.Default.CalendarToday,
+                                contentDescription = "Pick Date",
+                                tint = palette.primary
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 MotoTextField(
                     value = odometer,
@@ -128,7 +224,7 @@ fun AddServiceScreen(
                 MotoTextField(
                     value = totalCost,
                     onValueChange = { totalCost = it },
-                    label = "Total Service Cost (৳) *",
+                    label = stringResource(id = R.string.total_service_cost),
                     keyboardType = KeyboardType.Decimal
                 )
             }
@@ -138,7 +234,7 @@ fun AddServiceScreen(
             // Items Serviced Multi-Select Chips
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "ITEMS SERVICED (MULTI-SELECT)",
+                    text = stringResource(id = R.string.preset_items_header),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = palette.primary,
@@ -164,7 +260,7 @@ fun AddServiceScreen(
                             }
                         ) {
                             Text(
-                                text = preset,
+                                text = presetItemLabels[preset] ?: preset,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = contentColor,
@@ -180,7 +276,7 @@ fun AddServiceScreen(
             // Location & Center Name Card
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "SERVICE LOCATION",
+                    text = stringResource(id = R.string.service_center),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = palette.primary,
@@ -202,7 +298,11 @@ fun AddServiceScreen(
                             onClick = { isOfficial = true },
                             colors = RadioButtonDefaults.colors(selectedColor = palette.primary)
                         )
-                        Text(text = "Official", fontSize = 14.sp, color = palette.textPrimary)
+                        Text(
+                            text = stringResource(id = R.string.official_center),
+                            fontSize = 14.sp,
+                            color = palette.textPrimary
+                        )
                     }
 
                     Row(
@@ -214,7 +314,11 @@ fun AddServiceScreen(
                             onClick = { isOfficial = false },
                             colors = RadioButtonDefaults.colors(selectedColor = palette.primary)
                         )
-                        Text(text = "Other Garage", fontSize = 14.sp, color = palette.textPrimary)
+                        Text(
+                            text = stringResource(id = R.string.other_garage),
+                            fontSize = 14.sp,
+                            color = palette.textPrimary
+                        )
                     }
                 }
 

@@ -22,6 +22,7 @@
     <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_fuel">Fuel</string>
+    <string name="nav_maintenance">Maintenance</string>
     <string name="nav_service">Service</string>
     <string name="nav_history">History</string>
     <string name="nav_settings">Settings</string>
@@ -34,6 +35,7 @@
     <string name="current_mileage">Current Mileage</string>
     <string name="avg_mileage">Average Mileage</string>
     <string name="best_mileage">Best Mileage</string>
+    <string name="worst_mileage">Worst Mileage</string>
     <string name="cost_per_km">Cost / km</string>
     <string name="quick_actions">Quick Actions</string>
     <string name="add_fuel">Add Fuel</string>
@@ -43,10 +45,19 @@
     <string name="recent_activity">Recent Activity</string>
     <string name="no_bike_title">Add Your Motorcycle to Get Started</string>
     <string name="btn_add_bike">Add Motorcycle</string>
+
+    <string name="est_fuel_range_header">ESTIMATED FUEL &amp; RANGE</string>
+    <string name="est_fuel_label">Est. Fuel</string>
+    <string name="est_range_label">Est. Range</string>
+    <string name="last_fill_label">Last fill</string>
+    <string name="manage_label">Manage →</string>
     
     <!-- Bike Form -->
     <string name="add_bike_title">Add Your Motorcycle</string>
     <string name="edit_bike_title">Edit Motorcycle</string>
+    <string name="basic_info_header">BASIC INFORMATION</string>
+    <string name="fuel_config_header">FUEL CONFIGURATION</string>
+    <string name="tyre_setup_header">TYRE SETUP</string>
     <string name="bike_nickname">Bike Nickname *</string>
     <string name="brand">Brand *</string>
     <string name="model">Model *</string>
@@ -62,6 +73,8 @@
     <!-- Fuel Form -->
     <string name="add_fuel_title">Add Fuel Entry</string>
     <string name="edit_fuel_title">Edit Fuel Entry</string>
+    <string name="fill_type_header">FILL TYPE</string>
+    <string name="entry_details_header">ENTRY DETAILS</string>
     <string name="full_tank">FULL TANK</string>
     <string name="partial_tank">PARTIAL</string>
     <string name="date">Date</string>
@@ -72,17 +85,71 @@
     <string name="station_name">Fuel Station Name</string>
     <string name="notes">Notes</string>
     <string name="btn_save_fuel">Save Fuel Entry</string>
+    <string name="fuel_history_title">Fuel History</string>
+    <string name="total_spent">Total Spent</string>
+    <string name="total_fuel_qty">Total Fuel</string>
     
     <!-- Service Form -->
     <string name="add_service_title">Add Service Entry</string>
+    <string name="service_category_header">SERVICE CATEGORY</string>
+    <string name="details_header">DETAILS</string>
     <string name="category">Category</string>
     <string name="regular_service">Regular Service</string>
+    <string name="preset_items_header">PRESET SERVICE ITEMS</string>
     <string name="items_serviced">Items Serviced</string>
     <string name="service_center">Service Center / Garage Name</string>
     <string name="official_center">Official Service Center</string>
     <string name="other_garage">Other Garage</string>
+    <string name="total_service_cost">Total Service Cost (৳) *</string>
     <string name="btn_save_service">Save Service Entry</string>
+    <string name="service_history_title">Service History</string>
+
+    <!-- Tyre, Wash, Chain & History -->
+    <string name="tyre_screen_title">Tyre Pressure &amp; Air Log</string>
+    <string name="recommended_pressure">Recommended Pressure</string>
+    <string name="front_tyre">Front Tyre</string>
+    <string name="rear_tyre">Rear Tyre</string>
+    <string name="save_tyre_log">Save Tyre Log</string>
+    <string name="air_refill_date">Air Refill Date</string>
+    <string name="select_air_refill_date">Select Refill Date</string>
+    <string name="log_air_refill">Save Air Refill Log</string>
+    <string name="previous_refill_dates">Previous Refill History</string>
+    <string name="last_refilled_before">Last Refilled Before</string>
+    <string name="no_previous_refill">No previous air refill entries recorded.</string>
+    <string name="wash_screen_title">Bike Wash History</string>
+    <string name="wash_type">Wash Type</string>
+    <string name="full_wash">Full Wash</string>
+    <string name="foam_wash">Foam Wash</string>
+    <string name="water_wash">Water Wash</string>
+    <string name="save_wash_log">Save Wash Log</string>
+    <string name="chain_screen_title">Chain Maintenance</string>
+    <string name="lube_type">Lubricant Type</string>
+    <string name="chain_lube_opt">Chain Lube</string>
+    <string name="gear_oil_opt">Gear Oil</string>
+    <string name="chain_clean_lube">Clean &amp; Lube</string>
+    <string name="save_chain_log">Save Chain Log</string>
+    <string name="history_screen_title">Timeline History</string>
+    <string name="history_all">ALL</string>
+    <string name="no_history">No history records found</string>
+    <string name="mileage_stats_title">Mileage Analytics</string>
+    <string name="rolling_mileage">Rolling Mileage (Last 5)</string>
+    <string name="confidence_score">Confidence Score</string>
     
+    <!-- Preset Items -->
+    <string name="item_engine_oil">Engine Oil</string>
+    <string name="item_oil_filter">Oil Filter</string>
+    <string name="item_air_filter">Air Filter</string>
+    <string name="item_spark_plug">Spark Plug</string>
+    <string name="item_front_brake_pad">Front Brake Pad</string>
+    <string name="item_rear_brake_pad">Rear Brake Pad</string>
+    <string name="item_brake_fluid">Brake Fluid</string>
+    <string name="item_coolant">Coolant</string>
+    <string name="item_chain_sprocket">Chain &amp; Sprocket</string>
+    <string name="item_battery">Battery</string>
+    <string name="item_front_tyre">Front Tyre</string>
+    <string name="item_rear_tyre">Rear Tyre</string>
+    <string name="item_clutch_plate">Clutch Plate</string>
+
     <!-- Backup -->
     <string name="backup_title">Backup &amp; Restore</string>
     <string name="last_backup">Last Backup</string>
@@ -96,6 +163,7 @@
     <string name="language">Language</string>
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>
+    <string name="theme_variant">Theme Variant</string>
     <string name="glass_intensity">Glass Intensity</string>
     <string name="card_radius">Card Radius</string>
     <string name="about">About MotoBook</string>

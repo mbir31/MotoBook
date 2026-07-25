@@ -26,6 +26,10 @@ import com.example.motobook.presentation.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
 
+import androidx.compose.foundation.clickable
+import com.example.motobook.presentation.components.IosBottomBar
+import com.example.motobook.presentation.navigation.Screen
+
 @Composable
 fun FuelHistoryScreen(
     entries: List<FuelEntry>,
@@ -34,6 +38,8 @@ fun FuelHistoryScreen(
     onAddFuelClick: () -> Unit,
     onEditEntryClick: (FuelEntry) -> Unit,
     onDeleteEntryClick: (FuelEntry) -> Unit,
+    onNavigateToMileageStats: (() -> Unit)? = null,
+    onTabSelected: ((String) -> Unit)? = null,
     onBackClick: (() -> Unit)? = null
 ) {
     val palette = LocalThemePalette.current
@@ -52,7 +58,7 @@ fun FuelHistoryScreen(
                 .padding(horizontal = 20.dp)
         ) {
             MotoTopBar(
-                title = "Fuel History",
+                title = stringResource(id = R.string.fuel_history_title),
                 onBackClick = onBackClick,
                 actions = {
                     IconButton(onClick = onAddFuelClick) {
@@ -76,7 +82,11 @@ fun FuelHistoryScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "TOTAL COST", fontSize = 11.sp, color = TextSecondary)
+                        Text(
+                            text = stringResource(id = R.string.total_spent).uppercase(),
+                            fontSize = 11.sp,
+                            color = TextSecondary
+                        )
                         Text(
                             text = "৳ ${String.format("%.0f", totalCost)}",
                             fontSize = 18.sp,
@@ -85,7 +95,11 @@ fun FuelHistoryScreen(
                         )
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "TOTAL FUEL", fontSize = 11.sp, color = TextSecondary)
+                        Text(
+                            text = stringResource(id = R.string.total_fuel_qty).uppercase(),
+                            fontSize = 11.sp,
+                            color = TextSecondary
+                        )
                         Text(
                             text = "${String.format("%.1f", totalQuantity)} L",
                             fontSize = 18.sp,
@@ -105,11 +119,49 @@ fun FuelHistoryScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (onNavigateToMileageStats != null) {
+                GlassCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onNavigateToMileageStats() }
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.LocalGasStation,
+                                contentDescription = null,
+                                tint = palette.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "View Mileage & Fuel Analytics",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = palette.textPrimary
+                            )
+                        }
+                        Text(
+                            text = "Stats →",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = palette.primary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
             if (entries.isEmpty()) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -136,8 +188,9 @@ fun FuelHistoryScreen(
                 }
             } else {
                 LazyColumn(
+                    modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 24.dp)
+                    contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
                     items(entries, key = { it.fuelId }) { entry ->
                         FuelEntryCard(
@@ -148,6 +201,13 @@ fun FuelHistoryScreen(
                         )
                     }
                 }
+            }
+
+            if (onTabSelected != null) {
+                IosBottomBar(
+                    currentRoute = Screen.FuelHistory.route,
+                    onTabSelected = onTabSelected
+                )
             }
         }
     }

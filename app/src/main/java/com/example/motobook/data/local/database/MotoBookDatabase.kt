@@ -14,9 +14,10 @@ import com.example.motobook.data.local.entity.*
         ServiceEntity::class,
         TyrePressureEntity::class,
         WashEntity::class,
-        ChainEntity::class
+        ChainEntity::class,
+        ReminderEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class MotoBookDatabase : RoomDatabase() {
@@ -26,6 +27,7 @@ abstract class MotoBookDatabase : RoomDatabase() {
     abstract fun tyrePressureDao(): TyrePressureDao
     abstract fun washDao(): WashDao
     abstract fun chainDao(): ChainDao
+    abstract fun reminderDao(): ReminderDao
 
     companion object {
         const val DATABASE_NAME = "motobook_database"

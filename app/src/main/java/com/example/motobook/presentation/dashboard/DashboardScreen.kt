@@ -25,14 +25,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
 import com.example.R
-import com.example.motobook.domain.model.Bike
-import com.example.motobook.domain.model.FuelEntry
-import com.example.motobook.domain.model.MileageStats
-import com.example.motobook.presentation.components.AnimatedCounter
-import com.example.motobook.presentation.components.GlassCard
-import com.example.motobook.presentation.components.GlowButton
-import com.example.motobook.presentation.components.MotoTopBar
+import com.example.motobook.domain.model.*
+
+import com.example.motobook.presentation.components.*
+import com.example.motobook.presentation.maintenance.AddReminderDialog
+import com.example.motobook.presentation.navigation.Screen
 import com.example.motobook.presentation.theme.*
 
 @Composable
@@ -40,25 +42,40 @@ fun DashboardScreen(
     bike: Bike?,
     mileageStats: MileageStats,
     lastFuelEntry: FuelEntry?,
+    fuelEntries: List<FuelEntry> = emptyList(),
+    serviceEntries: List<ServiceEntry> = emptyList(),
+    washEntries: List<WashEntry> = emptyList(),
+    reminders: List<MaintenanceReminder> = emptyList(),
+    currentOdometer: Float? = null,
+    onAddReminder: (MaintenanceReminder) -> Unit = {},
+    onCompleteReminder: (MaintenanceReminder) -> Unit = {},
+    onDeleteReminder: (MaintenanceReminder) -> Unit = {},
     onAddBikeClick: () -> Unit,
-    onNavigateToAddFuel: () -> Unit,
-    onNavigateToFuelHistory: () -> Unit,
     onNavigateToMileageStats: () -> Unit,
-    onNavigateToAddService: () -> Unit,
-    onNavigateToServiceHistory: () -> Unit,
-    onNavigateToTyrePressure: () -> Unit,
-    onNavigateToWash: () -> Unit,
-    onNavigateToChain: () -> Unit,
-    onNavigateToHistory: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onTabSelected: (String) -> Unit
 ) {
     val palette = LocalThemePalette.current
+    var showAddReminderDialog by remember { mutableStateOf(false) }
+
+    if (showAddReminderDialog && bike != null) {
+        AddReminderDialog(
+            bikeId = bike.bikeId,
+            currentOdometer = currentOdometer,
+            onDismiss = { showAddReminderDialog = false },
+            onSaveReminder = { reminder ->
+                onAddReminder(reminder)
+                showAddReminderDialog = false
+            }
+        )
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.verticalGradient(listOf(palette.background, palette.surface)))
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -69,12 +86,35 @@ fun DashboardScreen(
             MotoTopBar(
                 title = stringResource(id = R.string.app_name),
                 actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = palette.textPrimary
-                        )
+                    Surface(
+                        modifier = Modifier
+                            .padding(end = 4.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable { onNavigateToSettings() },
+                        color = palette.surface.copy(alpha = 0.85f),
+                        shape = RoundedCornerShape(16.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, palette.primary.copy(alpha = 0.35f)),
+                        shadowElevation = 4.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Settings",
+                                tint = palette.primary,
+                                modifier = Modifier.size(26.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(id = R.string.settings_title),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = palette.textPrimary
+                            )
+                        }
                     }
                 }
             )
@@ -82,7 +122,7 @@ fun DashboardScreen(
             if (bike == null) {
                 // Empty state when no motorcycle added
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -118,8 +158,9 @@ fun DashboardScreen(
                 }
             } else {
                 LazyColumn(
+                    modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(bottom = 24.dp)
+                    contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
                     item {
                         // Motorcycle Hero Card
@@ -135,17 +176,29 @@ fun DashboardScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Box(
                                         modifier = Modifier
-                                            .size(52.dp)
+                                            .size(58.dp)
+                                            .clip(CircleShape)
                                             .background(palette.primary.copy(alpha = 0.2f), CircleShape)
-                                            .border(1.dp, palette.primary, CircleShape),
+                                            .border(1.5.dp, palette.primary, CircleShape),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.TwoWheeler,
-                                            contentDescription = null,
-                                            tint = palette.primary,
-                                            modifier = Modifier.size(30.dp)
-                                        )
+                                        if (!bike.bikeImagePath.isNullOrBlank()) {
+                                            AsyncImage(
+                                                model = bike.bikeImagePath,
+                                                contentDescription = "Bike Profile Photo",
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .clip(CircleShape)
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Default.TwoWheeler,
+                                                contentDescription = null,
+                                                tint = palette.primary,
+                                                modifier = Modifier.size(32.dp)
+                                            )
+                                        }
                                     }
                                     Spacer(modifier = Modifier.width(14.dp))
                                     Column {
@@ -194,7 +247,7 @@ fun DashboardScreen(
                         // Fuel Level & Range Gauge Card
                         GlassCard(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                text = "ESTIMATED FUEL & RANGE",
+                                text = stringResource(id = R.string.est_fuel_range_header),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = TextSecondary,
@@ -233,13 +286,13 @@ fun DashboardScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = "Est. Fuel: ~${String.format("%.1f", estFuel)} L",
+                                    text = "${stringResource(id = R.string.est_fuel_label)}: ~${String.format("%.1f", estFuel)} L",
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = palette.textPrimary
                                 )
                                 Text(
-                                    text = "Est. Range: ~${estRange.toInt()} km",
+                                    text = "${stringResource(id = R.string.est_range_label)}: ~${estRange.toInt()} km",
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = palette.primary
@@ -249,7 +302,7 @@ fun DashboardScreen(
                             if (lastFuelEntry != null) {
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
-                                    text = "Last fill: ${lastFuelEntry.fuelQuantity} L (${lastFuelEntry.odometer.toInt()} km)",
+                                    text = "${stringResource(id = R.string.last_fill_label)}: ${lastFuelEntry.fuelQuantity} L (${lastFuelEntry.odometer.toInt()} km)",
                                     fontSize = 12.sp,
                                     color = TextMuted
                                 )
@@ -316,64 +369,82 @@ fun DashboardScreen(
                         }
                     }
 
+                    // Maintenance Reminders & Engine Oil / Filter Distance Tracker
                     item {
-                        Text(
-                            text = stringResource(id = R.string.quick_actions),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextSecondary,
-                            letterSpacing = 1.sp
+                        ReminderTrackerCard(
+                            currentOdometer = currentOdometer,
+                            reminders = reminders,
+                            onAddReminderClick = { showAddReminderDialog = true },
+                            onCompleteReminderClick = onCompleteReminder,
+                            onDeleteReminderClick = onDeleteReminder
                         )
                     }
 
+                    // Monthly Expenditure Summary
                     item {
-                        // Quick Actions Grid (3x2)
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                QuickActionButton(
-                                    title = stringResource(id = R.string.add_fuel),
-                                    icon = Icons.Default.LocalGasStation,
-                                    onClick = onNavigateToAddFuel,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                QuickActionButton(
-                                    title = stringResource(id = R.string.tyre_pressure),
-                                    icon = Icons.Default.Speed,
-                                    onClick = onNavigateToTyrePressure,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                QuickActionButton(
-                                    title = stringResource(id = R.string.bike_wash),
-                                    icon = Icons.Default.WaterDrop,
-                                    onClick = onNavigateToWash,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
+                        MonthlyExpenditureCard(
+                            fuelEntries = fuelEntries,
+                            serviceEntries = serviceEntries,
+                            washEntries = washEntries
+                        )
+                    }
 
-                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                QuickActionButton(
-                                    title = "Service",
-                                    icon = Icons.Default.Build,
-                                    onClick = onNavigateToAddService,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                QuickActionButton(
-                                    title = stringResource(id = R.string.chain_lube),
-                                    icon = Icons.Default.Link,
-                                    onClick = onNavigateToChain,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                QuickActionButton(
-                                    title = "History",
-                                    icon = Icons.Default.History,
-                                    onClick = onNavigateToHistory,
-                                    modifier = Modifier.weight(1f)
-                                )
+
+                    item {
+                        // Vehicle Health & Overview Quick Navigation Banner
+                        GlassCard(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "OVERALL MOTORCYCLE STATUS",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextSecondary,
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "All Systems Ready",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = EmeraldPrimary
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "Use Fuel & Maintenance tabs to manage logs",
+                                        fontSize = 12.sp,
+                                        color = TextSecondary
+                                    )
+                                }
+
+                                Surface(
+                                    color = palette.primary.copy(alpha = 0.15f),
+                                    shape = MotoBookShapes.small,
+                                    modifier = Modifier.clickable { onTabSelected(Screen.Maintenance.route) }
+                                ) {
+                                    Text(
+                                        text = "Maintenance →",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = palette.primary,
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
+
+            // iOS Floating Navigation Bar
+            IosBottomBar(
+                currentRoute = Screen.Dashboard.route,
+                onTabSelected = onTabSelected
+            )
         }
     }
 }
@@ -407,48 +478,6 @@ private fun DashMetricCard(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextMuted
-            )
-        }
-    }
-}
-
-@Composable
-private fun QuickActionButton(
-    title: String,
-    icon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val palette = LocalThemePalette.current
-
-    GlassCard(
-        modifier = modifier.clickable { onClick() },
-        cornerRadius = 14.dp
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(38.dp)
-                    .background(palette.primary.copy(alpha = 0.15f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = palette.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = title,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = palette.textPrimary,
-                textAlign = TextAlign.Center
             )
         }
     }

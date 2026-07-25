@@ -88,7 +88,7 @@ fun AddBikeScreen(
             // Basic Information Card
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "BASIC INFORMATION",
+                    text = stringResource(id = R.string.basic_info_header),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = palette.primary,
@@ -147,7 +147,7 @@ fun AddBikeScreen(
             // Fuel Configuration Card
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "FUEL CONFIGURATION",
+                    text = stringResource(id = R.string.fuel_config_header),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = palette.primary,
@@ -194,7 +194,7 @@ fun AddBikeScreen(
             // Tyre Pressure Card
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "RECOMMENDED TYRE PRESSURE",
+                    text = stringResource(id = R.string.tyre_setup_header),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = palette.primary,

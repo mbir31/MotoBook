@@ -136,3 +136,28 @@ data class ChainEntity(
     val notes: String?,
     val createdAt: Long = System.currentTimeMillis()
 )
+
+@Entity(
+    tableName = "reminders",
+    foreignKeys = [ForeignKey(
+        entity = BikeEntity::class,
+        parentColumns = ["bikeId"],
+        childColumns = ["bikeId"],
+        onDelete = ForeignKey.CASCADE
+    )],
+    indices = [Index(value = ["bikeId"])]
+)
+data class ReminderEntity(
+    @PrimaryKey(autoGenerate = true)
+    val reminderId: Long = 0,
+    val bikeId: Long,
+    val title: String,
+    val dueOdometer: Float? = null,
+    val dueDate: Long? = null,
+    val intervalKm: Float? = null,
+    val lastDoneOdometer: Float? = null,
+    val lastDoneDate: Long? = null,
+    val isCompleted: Boolean = false,
+    val notes: String? = null,
+    val createdAt: Long = System.currentTimeMillis()
+)

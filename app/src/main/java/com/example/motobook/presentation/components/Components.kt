@@ -1,5 +1,6 @@
 package com.example.motobook.presentation.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,6 +11,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,12 +25,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
+import com.example.motobook.presentation.navigation.Screen
 import com.example.motobook.presentation.theme.*
 
 @Composable
@@ -320,6 +327,89 @@ fun StatCard(
                         tint = accentColor,
                         modifier = Modifier.size(22.dp)
                     )
+                }
+            }
+        }
+    }
+}
+
+data class NavItemData(
+    val route: String,
+    val titleResId: Int,
+    val icon: ImageVector
+)
+
+@Composable
+fun IosBottomBar(
+    currentRoute: String,
+    onTabSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val palette = LocalThemePalette.current
+    val items = listOf(
+        NavItemData(Screen.Dashboard.route, com.example.R.string.nav_home, Icons.Default.Home),
+        NavItemData(Screen.FuelHistory.route, com.example.R.string.nav_fuel, Icons.Default.LocalGasStation),
+        NavItemData(Screen.Maintenance.route, com.example.R.string.nav_maintenance, Icons.Default.Build),
+        NavItemData(Screen.History.route, com.example.R.string.nav_history, Icons.Default.History)
+    )
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        color = palette.surface.copy(alpha = 0.92f),
+        shape = RoundedCornerShape(26.dp),
+        shadowElevation = 8.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, palette.primary.copy(alpha = 0.25f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 6.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items.forEach { item ->
+                val isSelected = currentRoute == item.route
+                val animatedColor by animateColorAsState(
+                    targetValue = if (isSelected) palette.primary else TextSecondary,
+                    animationSpec = tween(300), label = "tabColor"
+                )
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(
+                            if (isSelected) palette.primary.copy(alpha = 0.16f) else Color.Transparent
+                        )
+                        .clickable {
+                            if (!isSelected) {
+                                onTabSelected(item.route)
+                            }
+                        }
+                        .padding(vertical = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = stringResource(id = item.titleResId),
+                            tint = animatedColor,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            text = stringResource(id = item.titleResId),
+                            fontSize = 11.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = animatedColor,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }

@@ -17,37 +17,44 @@ class AppContainer(private val context: Context) {
     }
 
     val bikeRepository: BikeRepository by lazy {
-        BikeRepositoryImpl(database.bikeDao())
+        BikeRepositoryImpl(database.bikeDao(), onDataChanged = { triggerAutoBackup() })
     }
 
     val fuelRepository: FuelRepository by lazy {
-        FuelRepositoryImpl(database.fuelDao())
+        FuelRepositoryImpl(database.fuelDao(), onDataChanged = { triggerAutoBackup() })
     }
 
     val serviceRepository: ServiceRepository by lazy {
-        ServiceRepositoryImpl(database.serviceDao())
+        ServiceRepositoryImpl(database.serviceDao(), onDataChanged = { triggerAutoBackup() })
     }
 
     val tyrePressureRepository: TyrePressureRepository by lazy {
-        TyrePressureRepositoryImpl(database.tyrePressureDao())
+        TyrePressureRepositoryImpl(database.tyrePressureDao(), onDataChanged = { triggerAutoBackup() })
     }
 
     val washRepository: WashRepository by lazy {
-        WashRepositoryImpl(database.washDao())
+        WashRepositoryImpl(database.washDao(), onDataChanged = { triggerAutoBackup() })
     }
 
     val chainRepository: ChainRepository by lazy {
-        ChainRepositoryImpl(database.chainDao())
+        ChainRepositoryImpl(database.chainDao(), onDataChanged = { triggerAutoBackup() })
     }
 
+    val reminderRepository: ReminderRepository by lazy {
+        ReminderRepositoryImpl(database.reminderDao(), onDataChanged = { triggerAutoBackup() })
+    }
+
+
     val backupRepository: BackupRepository by lazy {
-        BackupRepositoryImpl(
-            database.bikeDao(),
-            database.fuelDao(),
-            database.serviceDao(),
-            database.tyrePressureDao(),
-            database.washDao(),
-            database.chainDao()
+        BackupRepositoryImpl(database)
+    }
+
+    suspend fun triggerAutoBackup() {
+        com.example.motobook.data.backup.AutoBackupManager.triggerAutoBackup(
+            context = context,
+            database = database,
+            userPreferences = userPreferences
         )
     }
 }
+

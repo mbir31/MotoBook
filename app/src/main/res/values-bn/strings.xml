@@ -22,6 +22,7 @@
     <!-- Navigation -->
     <string name="nav_home">হোম</string>
     <string name="nav_fuel">জ্বালানি</string>
+    <string name="nav_maintenance">মেইনটেন্যান্স</string>
     <string name="nav_service">সার্ভিস</string>
     <string name="nav_history">হিস্ট্রি</string>
     <string name="nav_settings">সেটিংস</string>
@@ -34,6 +35,7 @@
     <string name="current_mileage">বর্তমান মাইলেজ</string>
     <string name="avg_mileage">গড় মাইলেজ</string>
     <string name="best_mileage">সেরা মাইলেজ</string>
+    <string name="worst_mileage">সর্বনিম্ন মাইলেজ</string>
     <string name="cost_per_km">প্রতি কিমিতে খরচ</string>
     <string name="quick_actions">দ্রুত কাজ</string>
     <string name="add_fuel">জ্বালানি যোগ</string>
@@ -43,11 +45,20 @@
     <string name="recent_activity">সাম্প্রতিক অ্যাক্টিভিটি</string>
     <string name="no_bike_title">শুরু করতে আপনার মোটরসাইকেল যোগ করুন</string>
     <string name="btn_add_bike">বাইক যোগ করুন</string>
+
+    <string name="est_fuel_range_header">আনুমানিক জ্বালানি ও সম্ভাব্য দূরত্ব</string>
+    <string name="est_fuel_label">অনুমানকৃত জ্বালানি</string>
+    <string name="est_range_label">সম্ভাব্য দূরত্ব</string>
+    <string name="last_fill_label">সর্বশেষ রিফুয়েল</string>
+    <string name="manage_label">পরিচালনা করুন →</string>
     
     <!-- Bike Form -->
     <string name="add_bike_title">মোটরসাইকেল যোগ করুন</string>
     <string name="edit_bike_title">মোটরসাইকেল এডিট করুন</string>
-    <string name="bike_nickname">বাইকের নাম *</string>
+    <string name="basic_info_header">মৌলিক তথ্য</string>
+    <string name="fuel_config_header">জ্বালানি সেটিংস</string>
+    <string name="tyre_setup_header">টায়ার প্রেশার সেটিংস</string>
+    <string name="bike_nickname">বাইকের ডাকনাম *</string>
     <string name="brand">ব্র্যান্ড *</string>
     <string name="model">মডেল *</string>
     <string name="year">উৎপাদন সাল</string>
@@ -62,6 +73,8 @@
     <!-- Fuel Form -->
     <string name="add_fuel_title">জ্বালানি হিসেব যোগ করুন</string>
     <string name="edit_fuel_title">জ্বালানি হিসেব এডিট করুন</string>
+    <string name="fill_type_header">ফুয়েল পূর্ণ করার ধরন</string>
+    <string name="entry_details_header">এন্ট্রির বিবরণ</string>
     <string name="full_tank">ফুল ট্যাংক</string>
     <string name="partial_tank">পার্শিয়াল (আংশিক)</string>
     <string name="date">তারিখ</string>
@@ -72,17 +85,71 @@
     <string name="station_name">ফুয়েল পাম্পের নাম</string>
     <string name="notes">নোট</string>
     <string name="btn_save_fuel">জ্বালানি সেভ করুন</string>
+    <string name="fuel_history_title">জ্বালানির ইতিহাস</string>
+    <string name="total_spent">মোট খরচ</string>
+    <string name="total_fuel_qty">মোট জ্বালানি</string>
     
     <!-- Service Form -->
     <string name="add_service_title">সার্ভিস এন্ট্রি যোগ করুন</string>
+    <string name="service_category_header">সার্ভিসের ক্যাটাগরি</string>
+    <string name="details_header">বিবরণ</string>
     <string name="category">ক্যাটাগরি</string>
     <string name="regular_service">রেগুলার সার্ভিস</string>
+    <string name="preset_items_header">সার্ভিস আইটেম নির্বাচন করুন</string>
     <string name="items_serviced">সার্ভিস করা পার্টস</string>
     <string name="service_center">সার্ভিস সেন্টার / গ্যারেজের নাম</string>
     <string name="official_center">অফিসিয়াল সার্ভিস সেন্টার</string>
     <string name="other_garage">অন্যান্য গ্যারেজ</string>
+    <string name="total_service_cost">মোট সার্ভিস খরচ (৳) *</string>
     <string name="btn_save_service">সার্ভিস সেভ করুন</string>
+    <string name="service_history_title">সার্ভিস ইতিহাস</string>
+
+    <!-- Tyre, Wash, Chain & History -->
+    <string name="tyre_screen_title">টায়ার প্রেশার ও হাওয়ার লগ</string>
+    <string name="recommended_pressure">প্রস্তাবিত টায়ার প্রেশার</string>
+    <string name="front_tyre">সামনের টায়ার</string>
+    <string name="rear_tyre">পেছনের টায়ার</string>
+    <string name="save_tyre_log">টায়ার প্রেশার লগ সেভ করুন</string>
+    <string name="air_refill_date">হাওয়া ভরার তারিখ</string>
+    <string name="select_air_refill_date">তারিখ নির্বাচন করুন</string>
+    <string name="log_air_refill">হাওয়া ভরার ইতিহাস সেভ করুন</string>
+    <string name="previous_refill_dates">পূর্ববর্তী হাওয়া ভরার ইতিহাস</string>
+    <string name="last_refilled_before">সর্বশেষ হাওয়া রিফিল</string>
+    <string name="no_previous_refill">পূর্বে কোনো হাওয়া ভরার রেকর্ড নেই।</string>
+    <string name="wash_screen_title">বাইক ওয়াশ হিস্ট্রি</string>
+    <string name="wash_type">ওয়াশের ধরণ</string>
+    <string name="full_wash">সম্পূর্ণ ওয়াশ</string>
+    <string name="foam_wash">ফোম ওয়াশ</string>
+    <string name="water_wash">সাধারণ ওয়াটার ওয়াশ</string>
+    <string name="save_wash_log">ওয়াশ রেকর্ড সেভ করুন</string>
+    <string name="chain_screen_title">চেইন রক্ষণাবেক্ষণ</string>
+    <string name="lube_type">লুব্রিকেন্টের ধরণ</string>
+    <string name="chain_lube_opt">চেইন লুব</string>
+    <string name="gear_oil_opt">গিয়ার অয়েল</string>
+    <string name="chain_clean_lube">ক্লিন ও লুব</string>
+    <string name="save_chain_log">চেইন মেইনটেন্যান্স সেভ করুন</string>
+    <string name="history_screen_title">হিস্ট্রি টাইমলাইন</string>
+    <string name="history_all">সব</string>
+    <string name="no_history">কোনো হিস্ট্রি রেকর্ড পাওয়া যায়নি</string>
+    <string name="mileage_stats_title">মাইলেজ অ্যানালিটিক্স</string>
+    <string name="rolling_mileage">সাম্প্রতিক মাইলেজ (শেষ ৫টি)</string>
+    <string name="confidence_score">নিখুঁততার মান</string>
     
+    <!-- Preset Items -->
+    <string name="item_engine_oil">ইঞ্জিন অয়েল</string>
+    <string name="item_oil_filter">অয়েল ফিল্টার</string>
+    <string name="item_air_filter">এয়ার ফিল্টার</string>
+    <string name="item_spark_plug">স্পার্ক প্লাগ</string>
+    <string name="item_front_brake_pad">সামনের ব্রেক প্যাড</string>
+    <string name="item_rear_brake_pad">পেছনের ব্রেক প্যাড</string>
+    <string name="item_brake_fluid">ব্রেক ফ্লুইড</string>
+    <string name="item_coolant">কুল্যান্ট</string>
+    <string name="item_chain_sprocket">চেইন ও স্প্রকেট</string>
+    <string name="item_battery">ব্যাটারি</string>
+    <string name="item_front_tyre">সামনের টায়ার</string>
+    <string name="item_rear_tyre">পেছনের টায়ার</string>
+    <string name="item_clutch_plate">ক্লাচ প্লেট</string>
+
     <!-- Backup -->
     <string name="backup_title">ব্যাকআপ ও রিস্টোর</string>
     <string name="last_backup">সর্বশেষ ব্যাকআপ</string>
@@ -96,8 +163,9 @@
     <string name="language">ভাষা</string>
     <string name="appearance">অ্যাপিয়ারেন্স</string>
     <string name="theme">থিম</string>
-    <string name="glass_intensity">গ্লাস ইনটেনসিটি</string>
-    <string name="card_radius">কার্ড রেডিয়াস</string>
+    <string name="theme_variant">থিম সংস্করণ</string>
+    <string name="glass_intensity">গ্লাসের স্বচ্ছতা</string>
+    <string name="card_radius">কার্ডের কোণ রাউন্ডনেস</string>
     <string name="about">মোটোবুক সম্পর্কে</string>
     <string name="about_text">মোটোবুক v1.0.0 — রাইডারদের জন্য তৈরি অফলাইন মোটরসাইকেল প্ল্যাটফর্ম।</string>
 </resources>

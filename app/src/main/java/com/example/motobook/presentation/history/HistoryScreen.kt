@@ -27,12 +27,16 @@ import com.example.motobook.presentation.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.example.motobook.presentation.components.IosBottomBar
+import com.example.motobook.presentation.navigation.Screen
+
 @Composable
 fun HistoryScreen(
     items: List<UnifiedHistoryItem>,
     selectedCategory: HistoryCategory,
     onCategorySelect: (HistoryCategory) -> Unit,
     onDeleteItem: (UnifiedHistoryItem) -> Unit,
+    onTabSelected: ((String) -> Unit)? = null,
     onBackClick: (() -> Unit)? = null
 ) {
     val palette = LocalThemePalette.current
@@ -51,7 +55,7 @@ fun HistoryScreen(
                 .padding(horizontal = 20.dp)
         ) {
             MotoTopBar(
-                title = "Timeline History",
+                title = stringResource(id = R.string.history_screen_title),
                 onBackClick = onBackClick
             )
 
@@ -65,13 +69,22 @@ fun HistoryScreen(
                     val chipBg = if (isSelected) palette.primary else palette.surface.copy(alpha = 0.5f)
                     val contentColor = if (isSelected) TextOnAccent else TextSecondary
 
+                    val catLabel = when (cat) {
+                        HistoryCategory.ALL -> stringResource(id = R.string.history_all)
+                        HistoryCategory.FUEL -> stringResource(id = R.string.nav_fuel)
+                        HistoryCategory.SERVICE -> stringResource(id = R.string.nav_service)
+                        HistoryCategory.TYRE -> stringResource(id = R.string.tyre_pressure)
+                        HistoryCategory.WASH -> stringResource(id = R.string.bike_wash)
+                        HistoryCategory.CHAIN -> stringResource(id = R.string.chain_lube)
+                    }
+
                     Surface(
                         color = chipBg,
                         shape = MotoBookShapes.small,
                         modifier = Modifier.clickable { onCategorySelect(cat) }
                     ) {
                         Text(
-                            text = cat.name,
+                            text = catLabel,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = contentColor,
@@ -85,19 +98,20 @@ fun HistoryScreen(
 
             if (items.isEmpty()) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No history records found",
+                        text = stringResource(id = R.string.no_history),
                         fontSize = 16.sp,
                         color = TextSecondary
                     )
                 }
             } else {
                 LazyColumn(
+                    modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 24.dp)
+                    contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
                     items(items, key = { itemKey(it) }) { item ->
                         HistoryCardItem(
@@ -107,6 +121,13 @@ fun HistoryScreen(
                         )
                     }
                 }
+            }
+
+            if (onTabSelected != null) {
+                IosBottomBar(
+                    currentRoute = Screen.History.route,
+                    onTabSelected = onTabSelected
+                )
             }
         }
     }

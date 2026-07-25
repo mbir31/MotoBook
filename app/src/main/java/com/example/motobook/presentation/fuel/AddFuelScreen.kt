@@ -1,6 +1,8 @@
 package com.example.motobook.presentation.fuel
 
+import android.app.DatePickerDialog
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -12,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -43,15 +46,29 @@ fun AddFuelScreen(
     ) -> Unit,
     onBackClick: (() -> Unit)? = null
 ) {
+    var fuelTypeIndex by remember {
+        mutableIntStateOf(if (existingEntry?.pricePerLiter == 140f) 1 else 0)
+    }
+    val fuelTypes = listOf("Octane (৳145/L)", "Petrol (৳140/L)")
+
     var refuelTypeIndex by remember {
         mutableIntStateOf(if (existingEntry?.refuelType == "PARTIAL") 1 else 0)
     }
-    val refuelTypes = listOf("FULL TANK", "PARTIAL")
+    val refuelTypes = listOf(
+        stringResource(id = R.string.full_tank),
+        stringResource(id = R.string.partial_tank)
+    )
 
     var selectedDateMillis by remember { mutableLongStateOf(existingEntry?.date ?: System.currentTimeMillis()) }
     var odometer by remember { mutableStateOf(existingEntry?.odometer?.toInt()?.toString() ?: "") }
     var quantity by remember { mutableStateOf(existingEntry?.fuelQuantity?.toString() ?: "") }
-    var pricePerLiter by remember { mutableStateOf(existingEntry?.pricePerLiter?.toString() ?: "105") }
+    var pricePerLiter by remember {
+        mutableStateOf(
+            existingEntry?.pricePerLiter?.let {
+                if (it % 1f == 0f) it.toInt().toString() else it.toString()
+            } ?: "145"
+        )
+    }
     var station by remember { mutableStateOf(existingEntry?.fuelStation ?: "") }
     var notes by remember { mutableStateOf(existingEntry?.notes ?: "") }
 
@@ -59,10 +76,33 @@ fun AddFuelScreen(
     val priceVal = pricePerLiter.toFloatOrNull() ?: 0f
     val calculatedTotalCost = qtyVal * priceVal
 
-    val dateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
-    val formattedDate = dateFormat.format(Date(selectedDateMillis))
-
+    val context = LocalContext.current
     val palette = LocalThemePalette.current
+
+    val dateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
+    val formattedDate = remember(selectedDateMillis) {
+        val dateStr = dateFormat.format(Date(selectedDateMillis))
+        val todayStr = dateFormat.format(Date())
+        if (dateStr == todayStr) "Today ($dateStr)" else dateStr
+    }
+
+    val calendar = Calendar.getInstance().apply { timeInMillis = selectedDateMillis }
+    val datePickerDialog = remember(selectedDateMillis, context) {
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                val cal = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, year)
+                    set(Calendar.MONTH, month)
+                    set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                }
+                selectedDateMillis = cal.timeInMillis
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -85,10 +125,32 @@ fun AddFuelScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Fuel Type Selection Card
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "FUEL TYPE & PRICE PRESET",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = palette.primary,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                SegmentedToggle(
+                    options = fuelTypes,
+                    selectedIndex = fuelTypeIndex,
+                    onOptionSelected = { index ->
+                        fuelTypeIndex = index
+                        pricePerLiter = if (index == 0) "145" else "140"
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Fill Type Segmented Toggle
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "FILL TYPE",
+                    text = stringResource(id = R.string.fill_type_header),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = palette.primary,
@@ -107,7 +169,7 @@ fun AddFuelScreen(
             // Fuel Details Card
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "ENTRY DETAILS",
+                    text = stringResource(id = R.string.entry_details_header),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = palette.primary,
@@ -115,23 +177,42 @@ fun AddFuelScreen(
                 )
                 Spacer(modifier = Modifier.height(14.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { datePickerDialog.show() },
+                    color = palette.surface.copy(alpha = 0.6f),
+                    shape = MotoBookShapes.medium,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, palette.primary.copy(alpha = 0.3f))
                 ) {
-                    Text(
-                        text = "Date: $formattedDate",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = palette.textPrimary
-                    )
-                    IconButton(onClick = { /* Date picker triggered */ }) {
-                        Icon(
-                            imageVector = Icons.Default.CalendarToday,
-                            contentDescription = "Pick Date",
-                            tint = palette.primary
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = stringResource(id = R.string.date),
+                                fontSize = 11.sp,
+                                color = TextSecondary
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = formattedDate,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = palette.textPrimary
+                            )
+                        }
+                        IconButton(onClick = { datePickerDialog.show() }) {
+                            Icon(
+                                imageVector = Icons.Default.CalendarToday,
+                                contentDescription = "Pick Date",
+                                tint = palette.primary
+                            )
+                        }
                     }
                 }
 
@@ -179,7 +260,7 @@ fun AddFuelScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "TOTAL COST",
+                        text = stringResource(id = R.string.total_cost).uppercase(),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextSecondary,

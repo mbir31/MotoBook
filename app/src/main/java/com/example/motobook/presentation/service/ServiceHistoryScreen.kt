@@ -49,7 +49,7 @@ fun ServiceHistoryScreen(
                 .padding(horizontal = 20.dp)
         ) {
             MotoTopBar(
-                title = "Service History",
+                title = stringResource(id = R.string.service_history_title),
                 onBackClick = onBackClick,
                 actions = {
                     IconButton(onClick = onAddServiceClick) {
@@ -73,7 +73,11 @@ fun ServiceHistoryScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "TOTAL SERVICE COST", fontSize = 11.sp, color = TextSecondary)
+                        Text(
+                            text = stringResource(id = R.string.total_spent).uppercase(),
+                            fontSize = 11.sp,
+                            color = TextSecondary
+                        )
                         Text(
                             text = "৳ ${String.format("%.0f", totalCost)}",
                             fontSize = 20.sp,

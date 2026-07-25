@@ -62,6 +62,14 @@ interface ChainRepository {
     suspend fun deleteChainEntry(entry: ChainEntry)
 }
 
+interface ReminderRepository {
+    fun getRemindersByBike(bikeId: Long): Flow<List<MaintenanceReminder>>
+    suspend fun getRemindersByBikeSync(bikeId: Long): List<MaintenanceReminder>
+    suspend fun insertReminder(reminder: MaintenanceReminder): Long
+    suspend fun updateReminder(reminder: MaintenanceReminder)
+    suspend fun deleteReminder(reminder: MaintenanceReminder)
+}
+
 interface BackupRepository {
     suspend fun createBackupJson(): String
     suspend fun restoreBackupJson(jsonString: String): Boolean

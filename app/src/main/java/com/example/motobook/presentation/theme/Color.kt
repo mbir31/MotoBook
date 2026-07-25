@@ -26,6 +26,8 @@ val PurplePrimary = FrostSecondary
 val EmeraldPrimary = Color(0xFF059669)
 val AmberPrimary = Color(0xFFD97706)
 val CoralPrimary = Color(0xFFDC2626)
+val RedPrimary = CoralPrimary
+
 
 // Text Colors (Optimized for High-Contrast Light Layouts)
 val TextPrimary = Color(0xFF0F172A) // Dark slate primary text

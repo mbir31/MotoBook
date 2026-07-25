@@ -15,6 +15,7 @@ sealed class Screen(val route: String) {
     }
     object FuelHistory : Screen("fuel_history")
     object MileageStats : Screen("mileage_stats")
+    object Maintenance : Screen("maintenance")
     object AddService : Screen("add_service")
     object ServiceHistory : Screen("service_history")
     object History : Screen("history")
