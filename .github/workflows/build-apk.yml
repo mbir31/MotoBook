@@ -1,0 +1,101 @@
+name: Build Debug APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Find Android Project and App Module
+        id: find_project
+        run: |
+          # Find gradlew file
+          GRADLEW_FILE=$(find . -name "gradlew" -type f -print -quit)
+          if [ -z "$GRADLEW_FILE" ]; then
+            echo "::error::Could not find gradlew in the repository"
+            exit 1
+          fi
+
+          GRADLE_ROOT=$(dirname "$GRADLEW_FILE")
+          # Normalize path
+          GRADLE_ROOT=$(realpath --relative-to=. "$GRADLE_ROOT")
+          if [ "$GRADLE_ROOT" = "" ]; then GRADLE_ROOT="."; fi
+          echo "gradle_root=$GRADLE_ROOT" >> $GITHUB_OUTPUT
+          echo "Found Gradle root at: $GRADLE_ROOT"
+
+          # Give execute permission
+          chmod +x "$GRADLE_ROOT/gradlew"
+
+          # Find App module
+          # We look for a build.gradle or build.gradle.kts that applies the com.android.application plugin but NOT with 'apply false'
+          APP_BUILD_FILE=$(find "$GRADLE_ROOT" \( -name "build.gradle" -o -name "build.gradle.kts" \) -not -path "*/.gradle/*" -not -path "*/build/*" -exec grep -lE "(com\.android\.application|alias\(libs\.plugins\.android\.application\))" {} + | xargs -r grep -L "apply false" | head -n 1)
+
+          if [ -z "$APP_BUILD_FILE" ]; then
+            echo "::error::Could not find an Android application module"
+            exit 1
+          fi
+
+          APP_MODULE_DIR=$(dirname "$APP_BUILD_FILE")
+          echo "app_module_dir=$APP_MODULE_DIR" >> $GITHUB_OUTPUT
+          echo "Found App module at: $APP_MODULE_DIR"
+
+      - name: Clean Stale Caches
+        run: |
+          GRADLE_ROOT="${{ steps.find_project.outputs.gradle_root }}"
+          APP_MODULE_DIR="${{ steps.find_project.outputs.app_module_dir }}"
+
+          echo "Removing project-level .gradle directory"
+          rm -rf "$GRADLE_ROOT/.gradle"
+
+          echo "Removing application build directory"
+          rm -rf "$APP_MODULE_DIR/build"
+
+      - name: Build Debug APK
+        run: |
+          GRADLE_ROOT="${{ steps.find_project.outputs.gradle_root }}"
+          cd "$GRADLE_ROOT"
+          ./gradlew assembleDebug --stacktrace --no-daemon
+
+      - name: Locate and Verify APK
+        id: locate_apk
+        run: |
+          APP_MODULE_DIR="${{ steps.find_project.outputs.app_module_dir }}"
+
+          # Search for APKs in the module's build output
+          APK_FILES=$(find "$APP_MODULE_DIR/build/outputs/apk" -name "*.apk" -type f)
+
+          if [ -z "$APK_FILES" ]; then
+            echo "::error::No APK found in the build output directory"
+            exit 1
+          fi
+
+          echo "Found APK(s):"
+          echo "$APK_FILES"
+
+          # Extract the directory containing the first APK to be uploaded
+          APK_DIR=$(dirname $(echo "$APK_FILES" | head -n 1))
+
+          # We will just upload all APKs found in the apk output directory
+          echo "apk_path=$APP_MODULE_DIR/build/outputs/apk/**/*.apk" >> $GITHUB_OUTPUT
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-app-debug-apk
+          path: ${{ steps.locate_apk.outputs.apk_path }}
+          if-no-files-found: error
