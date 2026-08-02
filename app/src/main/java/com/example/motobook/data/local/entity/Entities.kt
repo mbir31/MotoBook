@@ -20,6 +20,14 @@ data class BikeEntity(
     val frontTyrePressure: Float,
     val rearTyrePressure: Float,
     val bikeImagePath: String?,
+    val color: String = "Black",
+    val engineCc: Float = 150.0f,
+    val maxPower: String = "",
+    val recommendedOilGrade: String = "",
+    val maintenanceScheduleNote: String = "",
+    val countryOfOrigin: String = "Global",
+    val manualUrl: String = "",
+    val manualSummary: String = "",
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )

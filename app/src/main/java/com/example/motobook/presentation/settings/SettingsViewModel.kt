@@ -31,6 +31,9 @@ class SettingsViewModel(
     val lastBackupTime: StateFlow<Long> = preferences.lastBackupTime
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0L)
 
+    val isOnlineMode: StateFlow<Boolean> = preferences.isOnlineMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     fun setLanguage(lang: String) {
         viewModelScope.launch { preferences.setLanguage(lang) }
     }
@@ -49,6 +52,10 @@ class SettingsViewModel(
 
     fun setBackupEnabled(enabled: Boolean) {
         viewModelScope.launch { preferences.setBackupEnabled(enabled) }
+    }
+
+    fun setOnlineMode(enabled: Boolean) {
+        viewModelScope.launch { preferences.setOnlineMode(enabled) }
     }
 
     class Factory(private val preferences: UserPreferencesDataStore) : ViewModelProvider.Factory {

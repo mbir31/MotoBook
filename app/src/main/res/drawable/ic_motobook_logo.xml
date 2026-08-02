@@ -94,8 +94,34 @@
         android:fillColor="#0F172A"
         android:pathData="M96,120 m-13,0 a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0" />
     <path
+        android:fillColor="#0F172A"
+        android:pathData="M96,120 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0" />
+
+    <!-- Bengali Text •মোটোবুক• in white vector paths inside gauge -->
+    <!-- Left Dot • -->
+    <path
         android:fillColor="#FFFFFF"
-        android:pathData="M96,120 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+        android:pathData="M89.5,120 m-0.8,0 a0.8,0.8 0 1,0 1.6,0 a0.8,0.8 0 1,0 -1.6,0" />
+    <!-- mo (ম) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M91,118 L94,118 L94,118.8 L92.2,118.8 L92.2,121.2 L93.8,121.2 L93.8,118.8 L94.5,118.8 L94.5,122 M91,118 L91,122" />
+    <!-- To (ট) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M95.2,118 L97.2,118 M96.2,118 L96.2,122 C96.2,122.5 97.2,122.5 97.2,122" />
+    <!-- bu (বু) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M98,118 L100,118 L100,121.2 L98,121.2 Z M99,121.2 L99,122.5" />
+    <!-- k (ক) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100.8,118 L102.5,118 M101.6,118 L100.8,122 M101.6,119.8 L102.5,121 L101.6,122" />
+    <!-- Right Dot • -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M103.5,120 m-0.8,0 a0.8,0.8 0 1,0 1.6,0 a0.8,0.8 0 1,0 -1.6,0" />
 
     <path
         android:fillColor="#0F172A"

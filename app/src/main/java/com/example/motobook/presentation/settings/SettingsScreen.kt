@@ -13,11 +13,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.TwoWheeler
+import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -56,6 +59,8 @@ fun SettingsScreen(
     onCardRadiusChange: (Float) -> Unit,
     currentBike: Bike? = null,
     onUpdateBikePhoto: (String?) -> Unit = {},
+    isOnlineMode: Boolean = false,
+    onOnlineModeChange: (Boolean) -> Unit = {},
     onNavigateToBackup: () -> Unit,
     onBackClick: (() -> Unit)? = null
 ) {
@@ -348,6 +353,76 @@ fun SettingsScreen(
                     valueRange = 8f..32f,
                     colors = SliderDefaults.colors(thumbColor = palette.primary, activeTrackColor = palette.primary)
                 )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // App Online State Toggle Card
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = if (isOnlineMode) Icons.Default.Wifi else Icons.Default.WifiOff,
+                            contentDescription = null,
+                            tint = if (isOnlineMode) palette.primary else TextMuted
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = "APP ONLINE STATE",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isOnlineMode) palette.primary else palette.textPrimary,
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = if (isOnlineMode) "Online Mode Active 🌐" else "Offline Mode Active 🔒",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isOnlineMode) EmeraldPrimary else AmberPrimary
+                            )
+                        }
+                    }
+
+                    Switch(
+                        checked = isOnlineMode,
+                        onCheckedChange = onOnlineModeChange,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = palette.primary,
+                            checkedTrackColor = palette.primary.copy(alpha = 0.3f),
+                            uncheckedThumbColor = TextMuted,
+                            uncheckedTrackColor = palette.surface
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Surface(
+                    shape = MotoBookShapes.small,
+                    color = if (isOnlineMode) palette.primary.copy(alpha = 0.1f) else palette.surface.copy(alpha = 0.6f),
+                    border = BorderStroke(1.dp, if (isOnlineMode) palette.primary.copy(alpha = 0.3f) else GlassBorder)
+                ) {
+                    Text(
+                        text = if (isOnlineMode) {
+                            "🌐 Online Mode Active: Cloud synchronization and Google Drive backup services are ready when connected."
+                        } else {
+                            "🔒 Offline Mode Active: The app operates 100% locally without external network calls. Your motorcycle profile, logs, and maintenance data stay strictly on device. Toggle ON whenever you wish to sync cloud backups with Google Drive."
+                        },
+                        fontSize = 12.sp,
+                        color = palette.textPrimary,
+                        lineHeight = 16.sp,
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

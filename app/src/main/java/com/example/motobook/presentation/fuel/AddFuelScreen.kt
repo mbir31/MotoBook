@@ -5,10 +5,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.LocalGasStation
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +37,7 @@ import java.util.*
 @Composable
 fun AddFuelScreen(
     existingEntry: FuelEntry? = null,
+    latestOdometer: Float? = null,
     onSaveClick: (
         fuelId: Long,
         date: Long,
@@ -59,9 +63,34 @@ fun AddFuelScreen(
         stringResource(id = R.string.partial_tank)
     )
 
+    // Mode 0 = Enter Total Cost (৳), Mode 1 = Enter Fuel Volume (L)
+    var calculationModeIndex by remember { mutableIntStateOf(0) }
+    val entryModes = listOf("Total Cost (৳)", "Volume (Liters)")
+
     var selectedDateMillis by remember { mutableLongStateOf(existingEntry?.date ?: System.currentTimeMillis()) }
-    var odometer by remember { mutableStateOf(existingEntry?.odometer?.toInt()?.toString() ?: "") }
-    var quantity by remember { mutableStateOf(existingEntry?.fuelQuantity?.toString() ?: "") }
+    var odometer by remember {
+        mutableStateOf(
+            existingEntry?.odometer?.toInt()?.toString()
+                ?: (latestOdometer?.toInt()?.toString() ?: "")
+        )
+    }
+
+    var totalCostInput by remember {
+        mutableStateOf(
+            existingEntry?.totalCost?.let {
+                if (it % 1f == 0f) it.toInt().toString() else String.format("%.2f", it)
+            } ?: "500"
+        )
+    }
+
+    var quantityInput by remember {
+        mutableStateOf(
+            existingEntry?.fuelQuantity?.let {
+                if (it % 1f == 0f) it.toInt().toString() else it.toString()
+            } ?: ""
+        )
+    }
+
     var pricePerLiter by remember {
         mutableStateOf(
             existingEntry?.pricePerLiter?.let {
@@ -69,12 +98,17 @@ fun AddFuelScreen(
             } ?: "145"
         )
     }
+
     var station by remember { mutableStateOf(existingEntry?.fuelStation ?: "") }
     var notes by remember { mutableStateOf(existingEntry?.notes ?: "") }
 
-    val qtyVal = quantity.toFloatOrNull() ?: 0f
-    val priceVal = pricePerLiter.toFloatOrNull() ?: 0f
-    val calculatedTotalCost = qtyVal * priceVal
+    val priceVal = pricePerLiter.toFloatOrNull() ?: 145f
+    val costVal = totalCostInput.toFloatOrNull() ?: 0f
+    val qtyVal = quantityInput.toFloatOrNull() ?: 0f
+
+    // Calculated values depending on mode
+    val computedQuantity = if (priceVal > 0f) costVal / priceVal else 0f
+    val computedTotalCost = qtyVal * priceVal
 
     val context = LocalContext.current
     val palette = LocalThemePalette.current
@@ -123,9 +157,57 @@ fun AddFuelScreen(
                 onBackClick = onBackClick
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Fuel Type Selection Card
+            // Latest Odometer Reference Banner
+            if (latestOdometer != null && latestOdometer > 0f) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            if (odometer.isBlank()) {
+                                odometer = latestOdometer.toInt().toString()
+                            }
+                        },
+                    color = palette.primary.copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, palette.primary.copy(alpha = 0.35f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Speed,
+                                contentDescription = null,
+                                tint = palette.primary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "LATEST ODOMETER: ${latestOdometer.toInt()} km",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = palette.primary
+                            )
+                        }
+                        Text(
+                            text = if (odometer.isNotBlank()) "Checked ✓" else "Tap to Use",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextSecondary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+            }
+
+            // Fuel Preset Card
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "FUEL TYPE & PRICE PRESET",
@@ -145,12 +227,12 @@ fun AddFuelScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Fill Type Segmented Toggle
+            // Entry Method Segmented Toggle: By Total Cost vs By Liters
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = stringResource(id = R.string.fill_type_header),
+                    text = "HOW DO YOU WANT TO ENTER FUEL?",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = palette.primary,
@@ -158,13 +240,13 @@ fun AddFuelScreen(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 SegmentedToggle(
-                    options = refuelTypes,
-                    selectedIndex = refuelTypeIndex,
-                    onOptionSelected = { refuelTypeIndex = it }
+                    options = entryModes,
+                    selectedIndex = calculationModeIndex,
+                    onOptionSelected = { calculationModeIndex = it }
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Fuel Details Card
             GlassCard(modifier = Modifier.fillMaxWidth()) {
@@ -177,6 +259,7 @@ fun AddFuelScreen(
                 )
                 Spacer(modifier = Modifier.height(14.dp))
 
+                // Date Picker Button
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -218,66 +301,143 @@ fun AddFuelScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                // Odometer field
                 MotoTextField(
                     value = odometer,
                     onValueChange = { odometer = it },
-                    label = stringResource(id = R.string.odometer),
+                    label = "Odometer Reading (km)",
                     keyboardType = KeyboardType.Number
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        MotoTextField(
-                            value = quantity,
-                            onValueChange = { quantity = it },
-                            label = stringResource(id = R.string.fuel_quantity),
-                            keyboardType = KeyboardType.Decimal
-                        )
+                // Mode-dependent fields
+                if (calculationModeIndex == 0) {
+                    // Enter Total Cost & Price Per Liter
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            MotoTextField(
+                                value = totalCostInput,
+                                onValueChange = { totalCostInput = it },
+                                label = "Total Cost (৳)",
+                                keyboardType = KeyboardType.Decimal
+                            )
+                        }
+                        Box(modifier = Modifier.weight(1f)) {
+                            MotoTextField(
+                                value = pricePerLiter,
+                                onValueChange = { pricePerLiter = it },
+                                label = "Price / Liter (৳)",
+                                keyboardType = KeyboardType.Decimal
+                            )
+                        }
                     }
-                    Box(modifier = Modifier.weight(1f)) {
-                        MotoTextField(
-                            value = pricePerLiter,
-                            onValueChange = { pricePerLiter = it },
-                            label = stringResource(id = R.string.price_per_liter),
-                            keyboardType = KeyboardType.Decimal
-                        )
+                } else {
+                    // Enter Fuel Quantity (Liters) & Price Per Liter
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            MotoTextField(
+                                value = quantityInput,
+                                onValueChange = { quantityInput = it },
+                                label = "Fuel Quantity (Liters)",
+                                keyboardType = KeyboardType.Decimal
+                            )
+                        }
+                        Box(modifier = Modifier.weight(1f)) {
+                            MotoTextField(
+                                value = pricePerLiter,
+                                onValueChange = { pricePerLiter = it },
+                                label = "Price / Liter (৳)",
+                                keyboardType = KeyboardType.Decimal
+                            )
+                        }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Tank Fill Type (Full vs Partial)
+                Text(
+                    text = "TANK FILL TYPE",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextSecondary
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                SegmentedToggle(
+                    options = refuelTypes,
+                    selectedIndex = refuelTypeIndex,
+                    onOptionSelected = { refuelTypeIndex = it }
+                )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Calculated Cost Banner
+            // Calculated Result Summary Callout
             GlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                backgroundColor = palette.primary.copy(alpha = 0.12f)
+                backgroundColor = palette.primary.copy(alpha = 0.15f)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.total_cost).uppercase(),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextSecondary,
-                        letterSpacing = 0.8.sp
-                    )
-                    Text(
-                        text = "৳ ${String.format("%.2f", calculatedTotalCost)}",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = palette.primary
-                    )
+                if (calculationModeIndex == 0) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "COMPUTED FUEL VOLUME",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextSecondary,
+                                letterSpacing = 0.8.sp
+                            )
+                            Text(
+                                text = "Total ৳${costVal.toInt()} ÷ ৳${priceVal.toInt()}/L",
+                                fontSize = 11.sp,
+                                color = TextMuted
+                            )
+                        }
+                        Text(
+                            text = "${String.format("%.2f", computedQuantity)} Liters",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = palette.primary
+                        )
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "COMPUTED TOTAL REFILL COST",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextSecondary,
+                                letterSpacing = 0.8.sp
+                            )
+                            Text(
+                                text = "${qtyVal} L × ৳${priceVal.toInt()}/L",
+                                fontSize = 11.sp,
+                                color = TextMuted
+                            )
+                        }
+                        Text(
+                            text = "৳ ${String.format("%.2f", computedTotalCost)}",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = palette.primary
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Optional Card
+            // Optional Details Card
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "OPTIONAL DETAILS",
@@ -308,11 +468,17 @@ fun AddFuelScreen(
             GlowButton(
                 text = stringResource(id = R.string.btn_save_fuel),
                 onClick = {
+                    val finalQtyStr = if (calculationModeIndex == 0) {
+                        String.format("%.2f", computedQuantity)
+                    } else {
+                        quantityInput
+                    }
+
                     onSaveClick(
                         existingEntry?.fuelId ?: 0L,
                         selectedDateMillis,
                         odometer,
-                        quantity,
+                        finalQtyStr,
                         pricePerLiter,
                         if (refuelTypeIndex == 0) "FULL" else "PARTIAL",
                         station,

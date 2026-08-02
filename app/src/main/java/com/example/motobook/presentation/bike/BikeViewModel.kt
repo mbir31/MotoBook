@@ -37,13 +37,23 @@ class BikeViewModel(
         tankCapacityStr: String,
         reserveCapacityStr: String,
         frontPsiStr: String,
-        rearPsiStr: String
+        rearPsiStr: String,
+        color: String = "Black",
+        engineCcStr: String = "150",
+        maxPower: String = "",
+        recommendedOilGrade: String = "",
+        maintenanceScheduleNote: String = "",
+        countryOfOrigin: String = "Global",
+        manualUrl: String = "",
+        manualSummary: String = "",
+        bikeImagePath: String? = null
     ) {
         val tankCap = tankCapacityStr.toFloatOrNull() ?: 12f
         val reserveCap = reserveCapacityStr.toFloatOrNull() ?: 2f
         val frontPsi = frontPsiStr.toFloatOrNull() ?: 28f
         val rearPsi = rearPsiStr.toFloatOrNull() ?: 32f
         val year = yearStr.toIntOrNull() ?: 2023
+        val engineCc = engineCcStr.toFloatOrNull() ?: 150f
 
         val bike = Bike(
             bikeId = bikeId,
@@ -56,7 +66,16 @@ class BikeViewModel(
             tankCapacity = tankCap,
             reserveCapacity = reserveCap,
             frontTyrePressure = frontPsi,
-            rearTyrePressure = rearPsi
+            rearTyrePressure = rearPsi,
+            color = color.ifBlank { "Black" },
+            engineCc = engineCc,
+            maxPower = maxPower,
+            recommendedOilGrade = recommendedOilGrade,
+            maintenanceScheduleNote = maintenanceScheduleNote,
+            countryOfOrigin = countryOfOrigin.ifBlank { "Global" },
+            manualUrl = manualUrl,
+            manualSummary = manualSummary,
+            bikeImagePath = bikeImagePath
         )
 
         viewModelScope.launch {

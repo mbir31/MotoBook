@@ -22,6 +22,9 @@ class UserPreferencesDataStore(private val context: Context) {
         val LAST_BACKUP_TIME_KEY = longPreferencesKey("last_backup_time")
         val ONBOARDING_COMPLETE_KEY = booleanPreferencesKey("onboarding_complete")
         val SELECTED_BIKE_ID_KEY = longPreferencesKey("selected_bike_id")
+        val GOOGLE_DRIVE_ACCOUNT_KEY = stringPreferencesKey("google_drive_account")
+        val GOOGLE_DRIVE_TOKEN_KEY = stringPreferencesKey("google_drive_token")
+        val ONLINE_MODE_KEY = booleanPreferencesKey("online_mode")
     }
 
     val language: Flow<String> = context.dataStore.data.map { prefs ->
@@ -64,6 +67,18 @@ class UserPreferencesDataStore(private val context: Context) {
         prefs[SELECTED_BIKE_ID_KEY] ?: -1L
     }
 
+    val googleDriveAccount: Flow<String?> = context.dataStore.data.map { prefs ->
+        prefs[GOOGLE_DRIVE_ACCOUNT_KEY]
+    }
+
+    val googleDriveToken: Flow<String?> = context.dataStore.data.map { prefs ->
+        prefs[GOOGLE_DRIVE_TOKEN_KEY]
+    }
+
+    val isOnlineMode: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[ONLINE_MODE_KEY] ?: false
+    }
+
     suspend fun setLanguage(lang: String) {
         context.dataStore.edit { prefs -> prefs[LANGUAGE_KEY] = lang }
     }
@@ -102,5 +117,16 @@ class UserPreferencesDataStore(private val context: Context) {
 
     suspend fun setSelectedBikeId(id: Long) {
         context.dataStore.edit { prefs -> prefs[SELECTED_BIKE_ID_KEY] = id }
+    }
+
+    suspend fun setGoogleDriveAccount(email: String?, token: String?) {
+        context.dataStore.edit { prefs ->
+            if (email != null) prefs[GOOGLE_DRIVE_ACCOUNT_KEY] = email else prefs.remove(GOOGLE_DRIVE_ACCOUNT_KEY)
+            if (token != null) prefs[GOOGLE_DRIVE_TOKEN_KEY] = token else prefs.remove(GOOGLE_DRIVE_TOKEN_KEY)
+        }
+    }
+
+    suspend fun setOnlineMode(enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[ONLINE_MODE_KEY] = enabled }
     }
 }

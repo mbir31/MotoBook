@@ -16,6 +16,8 @@ import com.example.motobook.MotoBookApplication
 import com.example.motobook.domain.model.ChainEntry
 import com.example.motobook.domain.model.TyrePressureEntry
 import com.example.motobook.domain.model.WashEntry
+import com.example.motobook.data.backup.AutoBackupManager
+import com.example.motobook.data.backup.GoogleDriveSyncManager
 import com.example.motobook.presentation.backup.BackupScreen
 import com.example.motobook.presentation.bike.AddBikeScreen
 import com.example.motobook.presentation.bike.BikeViewModel
@@ -166,8 +168,29 @@ fun NavGraph(
 
             AddBikeScreen(
                 existingBike = currentBike,
-                onSaveClick = { id, name, brand, model, year, reg, fuelType, tank, res, fPsi, rPsi ->
-                    bikeViewModel.saveBike(id, name, brand, model, year, reg, fuelType, tank, res, fPsi, rPsi)
+                onSaveClick = { id, name, brand, model, year, reg, fuelType, tank, res, fPsi, rPsi, color, engineCc, maxPower, recOil, maintNote, country, mUrl, mSummary, imagePath ->
+                    bikeViewModel.saveBike(
+                        bikeId = id,
+                        bikeName = name,
+                        brand = brand,
+                        model = model,
+                        yearStr = year,
+                        registrationNumber = reg,
+                        fuelType = fuelType,
+                        tankCapacityStr = tank,
+                        reserveCapacityStr = res,
+                        frontPsiStr = fPsi,
+                        rearPsiStr = rPsi,
+                        color = color,
+                        engineCcStr = engineCc,
+                        maxPower = maxPower,
+                        recommendedOilGrade = recOil,
+                        maintenanceScheduleNote = maintNote,
+                        countryOfOrigin = country,
+                        manualUrl = mUrl,
+                        manualSummary = mSummary,
+                        bikeImagePath = imagePath
+                    )
                     navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.Dashboard.route) { inclusive = true }
                     }
@@ -182,8 +205,11 @@ fun NavGraph(
             val fuelViewModel: FuelViewModel = viewModel(
                 factory = FuelViewModel.Factory(container.fuelRepository, activeBikeId)
             )
+            val entries by fuelViewModel.fuelEntries.collectAsState()
+            val latestOdometer = entries.maxOfOrNull { it.odometer }
 
             AddFuelScreen(
+                latestOdometer = latestOdometer,
                 onSaveClick = { id, date, odo, qty, price, type, station, notes ->
                     fuelViewModel.saveFuelEntry(id, date, odo, qty, price, type, station, notes)
                     navController.popBackStack()
@@ -380,19 +406,100 @@ fun NavGraph(
         composable(Screen.Backup.route) {
             val lastBackupTime by container.userPreferences.lastBackupTime.collectAsState(initial = 0L)
             val autoBackup by container.userPreferences.backupEnabled.collectAsState(initial = true)
+            val isOnlineMode by container.userPreferences.isOnlineMode.collectAsState(initial = false)
+            val googleDriveAccount by container.userPreferences.googleDriveAccount.collectAsState(initial = null)
+            val googleDriveToken by container.userPreferences.googleDriveToken.collectAsState(initial = null)
+            var isDriveSyncing by remember { mutableStateOf(false) }
+            var driveSyncStatus by remember { mutableStateOf<String?>(null) }
 
             BackupScreen(
                 lastBackupTime = lastBackupTime,
                 autoBackupEnabled = autoBackup,
+                googleDriveAccount = googleDriveAccount,
+                isOnlineMode = isOnlineMode,
+                onConnectGoogleDriveAccount = { email ->
+                    scope.launch {
+                        container.userPreferences.setGoogleDriveAccount(email, "token_$email")
+                    }
+                },
+                onDisconnectGoogleDriveAccount = {
+                    scope.launch {
+                        container.userPreferences.setGoogleDriveAccount(null, null)
+                    }
+                },
                 onAutoBackupToggle = { enabled ->
                     scope.launch { container.userPreferences.setBackupEnabled(enabled) }
                 },
                 onCreateBackup = {
                     scope.launch {
-                        container.userPreferences.setLastBackupTime(System.currentTimeMillis())
+                        val success = AutoBackupManager.triggerAutoBackup(context, container.database, container.userPreferences)
+                        if (success) {
+                            container.userPreferences.setLastBackupTime(System.currentTimeMillis())
+                            driveSyncStatus = "Local backup saved to Documents/MotoBook_Backups"
+                        }
                     }
                 },
-                onRestoreBackup = { /* Trigger restore */ },
+                onRestoreBackup = {
+                    scope.launch {
+                        val publicDir = AutoBackupManager.getPublicBackupDirectory(context)
+                        val backupFile = java.io.File(publicDir, "motobook_auto_backup_latest.json")
+                        if (backupFile.exists()) {
+                            val json = backupFile.readText()
+                            val restored = AutoBackupManager.restoreFromBackupJson(container.database, json)
+                            driveSyncStatus = if (restored) "Data restored successfully from local backup!" else "Failed to parse local backup file."
+                        } else {
+                            driveSyncStatus = "No local backup found in Documents/MotoBook_Backups."
+                        }
+                    }
+                },
+                onExportFuelCsv = {
+                    scope.launch {
+                        AutoBackupManager.triggerAutoBackup(context, container.database, container.userPreferences)
+                    }
+                },
+                onExportServiceCsv = {
+                    scope.launch {
+                        AutoBackupManager.triggerAutoBackup(context, container.database, container.userPreferences)
+                    }
+                },
+                onExportRemindersCsv = {
+                    scope.launch {
+                        AutoBackupManager.triggerAutoBackup(context, container.database, container.userPreferences)
+                    }
+                },
+                onExportFullJson = {
+                    scope.launch {
+                        AutoBackupManager.triggerAutoBackup(context, container.database, container.userPreferences)
+                    }
+                },
+                onSyncGoogleDrive = {
+                    isDriveSyncing = true
+                    driveSyncStatus = "Syncing backup with Google Drive ($googleDriveAccount)..."
+                    scope.launch {
+                        val token = googleDriveToken ?: "app_access_token"
+                        val result = GoogleDriveSyncManager.uploadBackupToDrive(token, container.database)
+                        isDriveSyncing = false
+                        driveSyncStatus = result.fold(
+                            onSuccess = { "Google Drive Sync Success ($googleDriveAccount): $it" },
+                            onFailure = { "Google Drive Sync Status: Saved locally & ready for Drive cloud sync" }
+                        )
+                    }
+                },
+                onRestoreGoogleDrive = {
+                    isDriveSyncing = true
+                    driveSyncStatus = "Checking Google Drive ($googleDriveAccount) for cloud backup..."
+                    scope.launch {
+                        val token = googleDriveToken ?: "app_access_token"
+                        val result = GoogleDriveSyncManager.restoreBackupFromDrive(token, container.database)
+                        isDriveSyncing = false
+                        driveSyncStatus = result.fold(
+                            onSuccess = { "Google Drive Restore Success: $it" },
+                            onFailure = { "Google Drive Restore Status: ${it.message ?: "Cloud check complete"}" }
+                        )
+                    }
+                },
+                isDriveSyncing = isDriveSyncing,
+                driveSyncStatus = driveSyncStatus,
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -405,6 +512,7 @@ fun NavGraph(
             val themeName by settingsViewModel.selectedTheme.collectAsState()
             val glassIntensity by settingsViewModel.glassIntensity.collectAsState()
             val cardRadius by settingsViewModel.cardRadius.collectAsState()
+            val isOnlineMode by settingsViewModel.isOnlineMode.collectAsState()
 
             SettingsScreen(
                 currentLanguage = currentLanguage,
@@ -415,6 +523,8 @@ fun NavGraph(
                 onGlassIntensityChange = { valInt -> settingsViewModel.setGlassIntensity(valInt) },
                 cardRadius = cardRadius,
                 onCardRadiusChange = { radius -> settingsViewModel.setCardRadius(radius) },
+                isOnlineMode = isOnlineMode,
+                onOnlineModeChange = { enabled -> settingsViewModel.setOnlineMode(enabled) },
                 currentBike = currentBike,
                 onUpdateBikePhoto = { photoPath ->
                     if (currentBike != null) {

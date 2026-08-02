@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.motobook.domain.model.FuelEntry
 import com.example.motobook.presentation.components.GlassCard
+import com.example.motobook.presentation.components.GlowButton
 import com.example.motobook.presentation.components.MotoTopBar
 import com.example.motobook.presentation.theme.*
 import java.text.SimpleDateFormat
@@ -59,16 +60,7 @@ fun FuelHistoryScreen(
         ) {
             MotoTopBar(
                 title = stringResource(id = R.string.fuel_history_title),
-                onBackClick = onBackClick,
-                actions = {
-                    IconButton(onClick = onAddFuelClick) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add Fuel",
-                            tint = palette.primary
-                        )
-                    }
-                }
+                onBackClick = onBackClick
             )
 
             // Summary Bar
@@ -202,6 +194,19 @@ fun FuelHistoryScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Large Bottom Add Fuel Button for Easy Access
+            GlowButton(
+                text = "+ ADD FUEL REFILL ENTRY",
+                onClick = onAddFuelClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             if (onTabSelected != null) {
                 IosBottomBar(

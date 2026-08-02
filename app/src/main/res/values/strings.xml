@@ -37,6 +37,7 @@
     <string name="best_mileage">Best Mileage</string>
     <string name="worst_mileage">Worst Mileage</string>
     <string name="cost_per_km">Cost / km</string>
+    <string name="fuel_cost_km">Cost / km</string>
     <string name="quick_actions">Quick Actions</string>
     <string name="add_fuel">Add Fuel</string>
     <string name="tyre_pressure">Tyre Pressure</string>

@@ -95,6 +95,58 @@ object AutoBackupManager {
     }
 
     /**
+     * Generates CSV for Fuel Entries.
+     */
+    suspend fun generateFuelCsv(database: MotoBookDatabase): String = withContext(Dispatchers.IO) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        val entries = database.fuelDao().getAllFuelEntriesSync()
+        val sb = StringBuilder()
+        sb.append("ID,Date,Odometer_km,FuelQuantity_L,PricePerLiter_BDT,TotalCost_BDT,RefuelType,Station,Notes\n")
+        entries.forEach { e ->
+            val dateStr = dateFormat.format(Date(e.date))
+            val notesEscaped = "\"${(e.notes ?: "").replace("\"", "\"\"")}\""
+            val stationEscaped = "\"${(e.fuelStation ?: "").replace("\"", "\"\"")}\""
+            sb.append("${e.fuelId},$dateStr,${e.odometer},${e.fuelQuantity},${e.pricePerLiter},${e.totalCost},${e.refuelType},$stationEscaped,$notesEscaped\n")
+        }
+        sb.toString()
+    }
+
+    /**
+     * Generates CSV for Service Entries.
+     */
+    suspend fun generateServiceCsv(database: MotoBookDatabase): String = withContext(Dispatchers.IO) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        val entries = database.serviceDao().getAllServicesSync()
+        val sb = StringBuilder()
+        sb.append("ID,Date,Odometer_km,Category,TotalCost_BDT,Station_Mechanic,ItemsServiced,Notes\n")
+        entries.forEach { e ->
+            val dateStr = dateFormat.format(Date(e.date))
+            val itemsEscaped = "\"${e.itemsServicedJson.replace("\"", "\"\"")}\""
+            val notesEscaped = "\"${(e.notes ?: "").replace("\"", "\"\"")}\""
+            val centerEscaped = "\"${(e.serviceCenterName ?: "").replace("\"", "\"\"")}\""
+            sb.append("${e.serviceId},$dateStr,${e.odometer},${e.category},${e.totalCost},$centerEscaped,$itemsEscaped,$notesEscaped\n")
+        }
+        sb.toString()
+    }
+
+    /**
+     * Generates CSV for Maintenance Reminders.
+     */
+    suspend fun generateRemindersCsv(database: MotoBookDatabase): String = withContext(Dispatchers.IO) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        val entries = database.reminderDao().getAllRemindersSync()
+        val sb = StringBuilder()
+        sb.append("ID,Title,DueOdometer_km,DueDate,IsCompleted,Notes\n")
+        entries.forEach { e ->
+            val dueDateStr = e.dueDate?.let { dateFormat.format(Date(it)) } ?: ""
+            val notesEscaped = "\"${(e.notes ?: "").replace("\"", "\"\"")}\""
+            val titleEscaped = "\"${e.title.replace("\"", "\"\"")}\""
+            sb.append("${e.reminderId},$titleEscaped,${e.dueOdometer ?: ""},$dueDateStr,${e.isCompleted},$notesEscaped\n")
+        }
+        sb.toString()
+    }
+
+    /**
      * Automatically triggers a backup to internal storage on every data input.
      */
     suspend fun triggerAutoBackup(
@@ -104,10 +156,15 @@ object AutoBackupManager {
     ): Boolean = withContext(Dispatchers.IO) {
         try {
             val jsonString = generateBackupJson(database)
+            val fuelCsv = generateFuelCsv(database)
+            val serviceCsv = generateServiceCsv(database)
+            val remindersCsv = generateRemindersCsv(database)
 
             val publicDir = getPublicBackupDirectory(context)
-            val latestFile = File(publicDir, "motobook_auto_backup_latest.json")
-            latestFile.writeText(jsonString)
+            File(publicDir, "motobook_auto_backup_latest.json").writeText(jsonString)
+            File(publicDir, "motobook_fuel_logs.csv").writeText(fuelCsv)
+            File(publicDir, "motobook_service_records.csv").writeText(serviceCsv)
+            File(publicDir, "motobook_maintenance_reminders.csv").writeText(remindersCsv)
 
             // Also keep a dated snapshot
             val dateStr = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
@@ -118,6 +175,9 @@ object AutoBackupManager {
             val appExtDir = getAppExternalBackupDirectory(context)
             appExtDir?.let { dir ->
                 File(dir, "motobook_auto_backup_latest.json").writeText(jsonString)
+                File(dir, "motobook_fuel_logs.csv").writeText(fuelCsv)
+                File(dir, "motobook_service_records.csv").writeText(serviceCsv)
+                File(dir, "motobook_maintenance_reminders.csv").writeText(remindersCsv)
             }
 
             userPreferences?.setLastBackupTime(System.currentTimeMillis())

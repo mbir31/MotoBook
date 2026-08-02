@@ -17,7 +17,7 @@ import com.example.motobook.data.local.entity.*
         ChainEntity::class,
         ReminderEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class MotoBookDatabase : RoomDatabase() {

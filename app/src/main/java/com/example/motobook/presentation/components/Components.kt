@@ -415,3 +415,68 @@ fun IosBottomBar(
         }
     }
 }
+
+@Composable
+fun MotoTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    keyboardType: androidx.compose.ui.text.input.KeyboardType = androidx.compose.ui.text.input.KeyboardType.Text,
+    singleLine: Boolean = true
+) {
+    val palette = LocalThemePalette.current
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label, fontSize = 12.sp) },
+        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = keyboardType),
+        singleLine = singleLine,
+        modifier = modifier.fillMaxWidth(),
+        shape = MotoBookShapes.small,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = palette.primary,
+            unfocusedBorderColor = GlassBorder,
+            focusedContainerColor = palette.surface,
+            unfocusedContainerColor = palette.surface.copy(alpha = 0.5f),
+            focusedLabelColor = palette.primary,
+            unfocusedLabelColor = TextSecondary
+        )
+    )
+}
+
+@Composable
+fun DashMetricCard(
+    title: String,
+    value: Float?,
+    unit: String,
+    accent: Color
+) {
+    val palette = LocalThemePalette.current
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = title.uppercase(),
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextMuted,
+            letterSpacing = 0.8.sp
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        if (value != null && value > 0f) {
+            AnimatedCounter(
+                value = value,
+                unit = unit,
+                decimalPlaces = 1,
+                fontSize = 22,
+                color = accent
+            )
+        } else {
+            Text(
+                text = "-- $unit",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextMuted
+            )
+        }
+    }
+}
