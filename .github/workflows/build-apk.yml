@@ -1,0 +1,83 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Find Android Project Root
+        id: find-root
+        run: |
+          # Find the directory containing gradlew
+          ROOT_DIR=$(dirname $(find . -name "gradlew" -type f | head -n 1))
+          if [ -z "$ROOT_DIR" ]; then
+            echo "Error: Could not find gradlew."
+            exit 1
+          fi
+          echo "Found project root at: $ROOT_DIR"
+          echo "root_dir=$ROOT_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Debug Keystore
+        run: |
+          ROOT_DIR="${{ steps.find-root.outputs.root_dir }}"
+          if [ ! -f "$ROOT_DIR/debug.keystore" ]; then
+            echo "Generating debug.keystore..."
+            keytool -genkey -v -keystore "$ROOT_DIR/debug.keystore" \
+              -alias androiddebugkey -storepass android -keypass android \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+      - name: Clean up caches
+        run: |
+          ROOT_DIR="${{ steps.find-root.outputs.root_dir }}"
+          # Remove only generated project caches and build outputs
+          rm -rf "$ROOT_DIR/.gradle"
+          # Find and remove build directories of the application module
+          find "$ROOT_DIR" -maxdepth 2 -type d -name "build" -exec rm -rf {} + || true
+
+      - name: Build Debug APK
+        run: |
+          ROOT_DIR="${{ steps.find-root.outputs.root_dir }}"
+          cd "$ROOT_DIR"
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace --no-daemon
+
+      - name: Locate and Verify APK
+        id: locate-apk
+        run: |
+          ROOT_DIR="${{ steps.find-root.outputs.root_dir }}"
+          APK_PATH=$(find "$ROOT_DIR" -name "*.apk" | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            echo "Error: No APK file generated!"
+            exit 1
+          fi
+          echo "APK found at: $APK_PATH"
+          echo "apk_path=$APK_PATH" >> "$GITHUB_OUTPUT"
+
+          # Move APK to a known location for the artifact upload step
+          mkdir -p apk_output
+          cp "$APK_PATH" apk_output/
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-app-debug-apk
+          path: apk_output/*.apk
+          if-no-files-found: error
